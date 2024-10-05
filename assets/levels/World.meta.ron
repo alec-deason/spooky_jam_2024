@@ -1,0 +1,6 @@
+(
+  assets:
+   [ 
+    ("Anchor", File ( path: "blueprints/Anchor.glb" )),
+   ]
+)
