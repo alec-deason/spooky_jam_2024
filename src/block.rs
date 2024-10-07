@@ -1,39 +1,52 @@
 use bevy::prelude::*;
+use bevy_mod_picking::prelude::*;
 
-#[derive(Component)]
+#[derive(Component, Reflect)]
+#[reflect(Component)]
 pub struct Block;
 
-#[derive(Resource)]
-pub struct BlockPack(Handle<Gltf>);
+#[derive(Component, Reflect)]
+#[reflect(Component)]
+pub struct Anchor;
 
-pub fn load_block(
-    mut commands: Commands,
-    ass: Res<AssetServer>,
-) {
-    let gltf = ass.load("blocks/basic.glb");
-    commands.insert_resource(BlockPack(gltf));
+#[derive(Component, Reflect)]
+#[reflect(Component)]
+pub struct Anchors(pub Vec<Vec3>);
+
+#[derive(Component, Reflect)]
+#[reflect(Component)]
+pub struct MouseAnchor;
+
+pub struct BlockPlugin;
+
+impl Plugin for BlockPlugin {
+    fn build(&self, app: &mut App) {
+        app
+            .register_type::<Anchor>()
+            .register_type::<MouseAnchor>()
+            .register_type::<Pickable>()
+            .register_type::<PickingInteraction>()
+            .register_type::<PickSelection>()
+            .register_type::<PickHighlight>()
+            .register_type::<Block>()
+            .add_systems(Update, configure_anchors);
+    }
 }
 
-pub fn spawn_block(
-    mut commands: Commands,
-    my: Res<BlockPack>,
-    assets_gltf: Res<Assets<Gltf>>,
-) {
-    // if the GLTF has loaded, we can navigate its contents
-    if let Some(gltf) = assets_gltf.get(&my.0) {
-        // spawn the first scene in the file
-        commands.spawn(SceneBundle {
-            scene: gltf.scenes[0].clone(),
-            ..Default::default()
-        });
+fn configure_anchors(mut commands: Commands, anchors: Query<(Entity, &Transform), With<Anchor>>, parent_query: Query<&Parent>, mut composite_anchors: Query<(Option<&mut Anchors>, &Transform)>) {
+    for (base_entity, base_transform) in &anchors {
+        commands.entity(base_entity).remove::<Anchor>();
+        let parent_entity = parent_query.iter_ancestors(base_entity).last().unwrap();
+        if let Ok((maybe_anchors, parent_transform)) = composite_anchors.get_mut(parent_entity) {
+            //let offset = base_transform.translation() - parent_transform.translation();
+            let mut translation = base_transform.translation * parent_transform.scale;
 
-        // spawn the scene named "YellowCar"
-        //ommands.spawn(SceneBundle {
-        //    scene: gltf.named_scenes["YellowCar"].clone(),
-        //    transform: Transform::from_xyz(1.0, 2.0, 3.0),
-        //    ..Default::default()
-        //});
-
-        // PERF: the `.clone()`s are just for asset handles, don't worry :)
+            if let Some(mut anchors) = maybe_anchors {
+                anchors.0.push(translation);
+            } else {
+                commands.entity(parent_entity).insert(Anchors(vec![translation]));
+                return;
+            }
+        }
     }
 }

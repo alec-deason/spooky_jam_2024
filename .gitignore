@@ -1,1 +1,5 @@
 /target
+*.blend1
+assets/levels
+assets/materials
+assets/blueprints

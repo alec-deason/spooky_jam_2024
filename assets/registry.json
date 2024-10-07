@@ -10,6 +10,27 @@
       "type": "array",
       "typeInfo": "Tuple"
     },
+    "(bevy_ecs::entity::Entity, bevy_picking_core::backend::HitData)": {
+      "isComponent": false,
+      "isResource": false,
+      "items": false,
+      "long_name": "(bevy_ecs::entity::Entity, bevy_picking_core::backend::HitData)",
+      "prefixItems": [
+        {
+          "type": {
+            "$ref": "#/$defs/bevy_ecs::entity::Entity"
+          }
+        },
+        {
+          "type": {
+            "$ref": "#/$defs/bevy_picking_core::backend::HitData"
+          }
+        }
+      ],
+      "short_name": "(Entity, HitData)",
+      "type": "array",
+      "typeInfo": "Tuple"
+    },
     "(u8, u8)": {
       "isComponent": false,
       "isResource": false,
@@ -46,6 +67,19 @@
       "short_name": "String",
       "type": "string",
       "typeInfo": "Value"
+    },
+    "alloc::vec::Vec<(bevy_ecs::entity::Entity, bevy_picking_core::backend::HitData)>": {
+      "isComponent": false,
+      "isResource": false,
+      "items": {
+        "type": {
+          "$ref": "#/$defs/(bevy_ecs::entity::Entity, bevy_picking_core::backend::HitData)"
+        }
+      },
+      "long_name": "alloc::vec::Vec<(bevy_ecs::entity::Entity, bevy_picking_core::backend::HitData)>",
+      "short_name": "Vec<(Entity, HitData)>",
+      "type": "array",
+      "typeInfo": "List"
     },
     "alloc::vec::Vec<alloc::string::String>": {
       "isComponent": false,
@@ -6545,6 +6579,19 @@
       "type": "object",
       "typeInfo": "Struct"
     },
+    "bevy_mod_raycast::immediate::RaycastVisibility": {
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "bevy_mod_raycast::immediate::RaycastVisibility",
+      "oneOf": [
+        "Ignore",
+        "MustBeVisible",
+        "MustBeVisibleAndInView"
+      ],
+      "short_name": "RaycastVisibility",
+      "type": "string",
+      "typeInfo": "Enum"
+    },
     "bevy_pbr::bundle::CascadesVisibleEntities": {
       "additionalProperties": false,
       "isComponent": true,
@@ -7777,6 +7824,530 @@
       "properties": {},
       "required": [],
       "short_name": "VolumetricLight",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_picking_core::Pickable": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "bevy_picking_core::Pickable",
+      "properties": {
+        "is_hoverable": {
+          "type": {
+            "$ref": "#/$defs/bool"
+          }
+        },
+        "should_block_lower": {
+          "type": {
+            "$ref": "#/$defs/bool"
+          }
+        }
+      },
+      "required": [
+        "should_block_lower",
+        "is_hoverable"
+      ],
+      "short_name": "Pickable",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_picking_core::PickingPluginsSettings": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": true,
+      "long_name": "bevy_picking_core::PickingPluginsSettings",
+      "properties": {
+        "is_enabled": {
+          "type": {
+            "$ref": "#/$defs/bool"
+          }
+        },
+        "is_focus_enabled": {
+          "type": {
+            "$ref": "#/$defs/bool"
+          }
+        },
+        "is_input_enabled": {
+          "type": {
+            "$ref": "#/$defs/bool"
+          }
+        }
+      },
+      "required": [
+        "is_enabled",
+        "is_input_enabled",
+        "is_focus_enabled"
+      ],
+      "short_name": "PickingPluginsSettings",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_picking_core::backend::HitData": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "bevy_picking_core::backend::HitData",
+      "properties": {
+        "camera": {
+          "type": {
+            "$ref": "#/$defs/bevy_ecs::entity::Entity"
+          }
+        },
+        "depth": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        },
+        "normal": {
+          "type": {
+            "$ref": "#/$defs/core::option::Option<glam::Vec3>"
+          }
+        },
+        "position": {
+          "type": {
+            "$ref": "#/$defs/core::option::Option<glam::Vec3>"
+          }
+        }
+      },
+      "required": [
+        "camera",
+        "depth"
+      ],
+      "short_name": "HitData",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_picking_core::backend::ray::RayId": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "bevy_picking_core::backend::ray::RayId",
+      "properties": {
+        "camera": {
+          "type": {
+            "$ref": "#/$defs/bevy_ecs::entity::Entity"
+          }
+        },
+        "pointer": {
+          "type": {
+            "$ref": "#/$defs/bevy_picking_core::pointer::PointerId"
+          }
+        }
+      },
+      "required": [
+        "camera",
+        "pointer"
+      ],
+      "short_name": "RayId",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_picking_core::focus::PickingInteraction": {
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "bevy_picking_core::focus::PickingInteraction",
+      "oneOf": [
+        "Pressed",
+        "Hovered",
+        "None"
+      ],
+      "short_name": "PickingInteraction",
+      "type": "string",
+      "typeInfo": "Enum"
+    },
+    "bevy_picking_core::pointer::PointerId": {
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "bevy_picking_core::pointer::PointerId",
+      "oneOf": [
+        {
+          "long_name": "Mouse"
+        },
+        {
+          "items": false,
+          "long_name": "Touch",
+          "prefixItems": [
+            {
+              "type": {
+                "$ref": "#/$defs/u64"
+              }
+            }
+          ],
+          "short_name": "Touch",
+          "type": "array",
+          "typeInfo": "Tuple"
+        },
+        {
+          "items": false,
+          "long_name": "Custom",
+          "prefixItems": [
+            {
+              "type": {
+                "$ref": "#/$defs/uuid::Uuid"
+              }
+            }
+          ],
+          "short_name": "Custom",
+          "type": "array",
+          "typeInfo": "Tuple"
+        }
+      ],
+      "short_name": "PointerId",
+      "type": "object",
+      "typeInfo": "Enum"
+    },
+    "bevy_picking_core::pointer::PointerInteraction": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "bevy_picking_core::pointer::PointerInteraction",
+      "properties": {
+        "sorted_entities": {
+          "type": {
+            "$ref": "#/$defs/alloc::vec::Vec<(bevy_ecs::entity::Entity, bevy_picking_core::backend::HitData)>"
+          }
+        }
+      },
+      "required": [
+        "sorted_entities"
+      ],
+      "short_name": "PointerInteraction",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_picking_core::pointer::PointerLocation": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "bevy_picking_core::pointer::PointerLocation",
+      "properties": {},
+      "required": [],
+      "short_name": "PointerLocation",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_picking_core::pointer::PointerPress": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "bevy_picking_core::pointer::PointerPress",
+      "properties": {
+        "middle": {
+          "type": {
+            "$ref": "#/$defs/bool"
+          }
+        },
+        "primary": {
+          "type": {
+            "$ref": "#/$defs/bool"
+          }
+        },
+        "secondary": {
+          "type": {
+            "$ref": "#/$defs/bool"
+          }
+        }
+      },
+      "required": [
+        "primary",
+        "secondary",
+        "middle"
+      ],
+      "short_name": "PointerPress",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_picking_highlight::GlobalHighlight<bevy_pbr::pbr_material::StandardMaterial>": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "bevy_picking_highlight::GlobalHighlight<bevy_pbr::pbr_material::StandardMaterial>",
+      "properties": {
+        "hovered": {
+          "type": {
+            "$ref": "#/$defs/bevy_asset::handle::Handle<bevy_pbr::pbr_material::StandardMaterial>"
+          }
+        },
+        "pressed": {
+          "type": {
+            "$ref": "#/$defs/bevy_asset::handle::Handle<bevy_pbr::pbr_material::StandardMaterial>"
+          }
+        },
+        "selected": {
+          "type": {
+            "$ref": "#/$defs/bevy_asset::handle::Handle<bevy_pbr::pbr_material::StandardMaterial>"
+          }
+        }
+      },
+      "required": [
+        "hovered",
+        "pressed",
+        "selected"
+      ],
+      "short_name": "GlobalHighlight<StandardMaterial>",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_picking_highlight::GlobalHighlight<bevy_sprite::mesh2d::color_material::ColorMaterial>": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "bevy_picking_highlight::GlobalHighlight<bevy_sprite::mesh2d::color_material::ColorMaterial>",
+      "properties": {
+        "hovered": {
+          "type": {
+            "$ref": "#/$defs/bevy_asset::handle::Handle<bevy_sprite::mesh2d::color_material::ColorMaterial>"
+          }
+        },
+        "pressed": {
+          "type": {
+            "$ref": "#/$defs/bevy_asset::handle::Handle<bevy_sprite::mesh2d::color_material::ColorMaterial>"
+          }
+        },
+        "selected": {
+          "type": {
+            "$ref": "#/$defs/bevy_asset::handle::Handle<bevy_sprite::mesh2d::color_material::ColorMaterial>"
+          }
+        }
+      },
+      "required": [
+        "hovered",
+        "pressed",
+        "selected"
+      ],
+      "short_name": "GlobalHighlight<ColorMaterial>",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_picking_highlight::Highlight<bevy_pbr::pbr_material::StandardMaterial>": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "bevy_picking_highlight::Highlight<bevy_pbr::pbr_material::StandardMaterial>",
+      "properties": {},
+      "required": [],
+      "short_name": "Highlight<StandardMaterial>",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_picking_highlight::Highlight<bevy_sprite::mesh2d::color_material::ColorMaterial>": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "bevy_picking_highlight::Highlight<bevy_sprite::mesh2d::color_material::ColorMaterial>",
+      "properties": {},
+      "required": [],
+      "short_name": "Highlight<ColorMaterial>",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_picking_highlight::HighlightPluginSettings": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": true,
+      "long_name": "bevy_picking_highlight::HighlightPluginSettings",
+      "properties": {
+        "is_enabled": {
+          "type": {
+            "$ref": "#/$defs/bool"
+          }
+        }
+      },
+      "required": [
+        "is_enabled"
+      ],
+      "short_name": "HighlightPluginSettings",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_picking_highlight::InitialHighlight<bevy_pbr::pbr_material::StandardMaterial>": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "bevy_picking_highlight::InitialHighlight<bevy_pbr::pbr_material::StandardMaterial>",
+      "properties": {
+        "initial": {
+          "type": {
+            "$ref": "#/$defs/bevy_asset::handle::Handle<bevy_pbr::pbr_material::StandardMaterial>"
+          }
+        }
+      },
+      "required": [
+        "initial"
+      ],
+      "short_name": "InitialHighlight<StandardMaterial>",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_picking_highlight::InitialHighlight<bevy_sprite::mesh2d::color_material::ColorMaterial>": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "bevy_picking_highlight::InitialHighlight<bevy_sprite::mesh2d::color_material::ColorMaterial>",
+      "properties": {
+        "initial": {
+          "type": {
+            "$ref": "#/$defs/bevy_asset::handle::Handle<bevy_sprite::mesh2d::color_material::ColorMaterial>"
+          }
+        }
+      },
+      "required": [
+        "initial"
+      ],
+      "short_name": "InitialHighlight<ColorMaterial>",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_picking_highlight::PickHighlight": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "bevy_picking_highlight::PickHighlight",
+      "properties": {},
+      "required": [],
+      "short_name": "PickHighlight",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_picking_input::InputPluginSettings": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": true,
+      "long_name": "bevy_picking_input::InputPluginSettings",
+      "properties": {
+        "is_mouse_enabled": {
+          "type": {
+            "$ref": "#/$defs/bool"
+          }
+        },
+        "is_touch_enabled": {
+          "type": {
+            "$ref": "#/$defs/bool"
+          }
+        }
+      },
+      "required": [
+        "is_touch_enabled",
+        "is_mouse_enabled"
+      ],
+      "short_name": "InputPluginSettings",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_picking_raycast::RaycastBackendSettings": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": true,
+      "long_name": "bevy_picking_raycast::RaycastBackendSettings",
+      "properties": {
+        "raycast_visibility": {
+          "type": {
+            "$ref": "#/$defs/bevy_mod_raycast::immediate::RaycastVisibility"
+          }
+        },
+        "require_markers": {
+          "type": {
+            "$ref": "#/$defs/bool"
+          }
+        }
+      },
+      "required": [
+        "require_markers",
+        "raycast_visibility"
+      ],
+      "short_name": "RaycastBackendSettings",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_picking_raycast::RaycastPickable": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "bevy_picking_raycast::RaycastPickable",
+      "properties": {},
+      "required": [],
+      "short_name": "RaycastPickable",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_picking_selection::NoDeselect": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "bevy_picking_selection::NoDeselect",
+      "properties": {},
+      "required": [],
+      "short_name": "NoDeselect",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_picking_selection::PickSelection": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "bevy_picking_selection::PickSelection",
+      "properties": {
+        "is_selected": {
+          "type": {
+            "$ref": "#/$defs/bool"
+          }
+        }
+      },
+      "required": [
+        "is_selected"
+      ],
+      "short_name": "PickSelection",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_picking_selection::PointerMultiselect": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "bevy_picking_selection::PointerMultiselect",
+      "properties": {
+        "is_pressed": {
+          "type": {
+            "$ref": "#/$defs/bool"
+          }
+        }
+      },
+      "required": [
+        "is_pressed"
+      ],
+      "short_name": "PointerMultiselect",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_picking_selection::SelectionPluginSettings": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": true,
+      "long_name": "bevy_picking_selection::SelectionPluginSettings",
+      "properties": {
+        "click_nothing_deselect_all": {
+          "type": {
+            "$ref": "#/$defs/bool"
+          }
+        },
+        "is_enabled": {
+          "type": {
+            "$ref": "#/$defs/bool"
+          }
+        },
+        "use_multiselect_default_inputs": {
+          "type": {
+            "$ref": "#/$defs/bool"
+          }
+        }
+      },
+      "required": [
+        "is_enabled",
+        "click_nothing_deselect_all",
+        "use_multiselect_default_inputs"
+      ],
+      "short_name": "SelectionPluginSettings",
       "type": "object",
       "typeInfo": "Struct"
     },
@@ -13399,6 +13970,33 @@
       "type": "object",
       "typeInfo": "Enum"
     },
+    "core::option::Option<glam::Vec3>": {
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "core::option::Option<glam::Vec3>",
+      "oneOf": [
+        {
+          "long_name": "None"
+        },
+        {
+          "items": false,
+          "long_name": "Some",
+          "prefixItems": [
+            {
+              "type": {
+                "$ref": "#/$defs/glam::Vec3"
+              }
+            }
+          ],
+          "short_name": "Some",
+          "type": "array",
+          "typeInfo": "Tuple"
+        }
+      ],
+      "short_name": "Option<Vec3>",
+      "type": "object",
+      "typeInfo": "Enum"
+    },
     "core::option::Option<petgraph::graph::NodeIndex>": {
       "isComponent": false,
       "isResource": false,
@@ -13963,14 +14561,69 @@
       "type": "object",
       "typeInfo": "Value"
     },
-    "spooky_jam::build_phase::Anchor": {
+    "spooky_jam::block::Anchor": {
       "additionalProperties": false,
       "isComponent": true,
       "isResource": false,
-      "long_name": "spooky_jam::build_phase::Anchor",
+      "long_name": "spooky_jam::block::Anchor",
       "properties": {},
       "required": [],
       "short_name": "Anchor",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "spooky_jam::block::Block": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "spooky_jam::block::Block",
+      "properties": {},
+      "required": [],
+      "short_name": "Block",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "spooky_jam::block::MouseAnchor": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "spooky_jam::block::MouseAnchor",
+      "properties": {},
+      "required": [],
+      "short_name": "MouseAnchor",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "spooky_jam::build_phase::BlockSpawner": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "spooky_jam::build_phase::BlockSpawner",
+      "properties": {},
+      "required": [],
+      "short_name": "BlockSpawner",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "spooky_jam::build_phase::BlockTenticle": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "spooky_jam::build_phase::BlockTenticle",
+      "properties": {},
+      "required": [],
+      "short_name": "BlockTenticle",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "spooky_jam::build_phase::FoundationIdle": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "spooky_jam::build_phase::FoundationIdle",
+      "properties": {},
+      "required": [],
+      "short_name": "FoundationIdle",
       "type": "object",
       "typeInfo": "Struct"
     },

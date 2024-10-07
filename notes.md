@@ -17,3 +17,20 @@ Basic mechanics:
     * Once the last non-spooky residents of the castle move out the phase is over?
  * Scoring phase:
     * Points for spooky residents, spooky effects and general level of desolation added up for each block in the castle. Negative points for cheer and/or survivors.
+
+
+
+
+
+
+
+
+
+
+
+
+Block spawn:
+follow mouse, snap to nearby anchors
+on click:
+    if snapped, become permanent
+    else despawn

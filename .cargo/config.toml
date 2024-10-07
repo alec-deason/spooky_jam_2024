@@ -11,4 +11,6 @@ codegen-backend = "cranelift"
 [profile.dev.package."*"]
 codegen-backend = "llvm"
 
+[target.wasm32-unknown-unknown]
+runner = "wasm-server-runner"
 

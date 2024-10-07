@@ -21,6 +21,8 @@ strip = "debuginfo"
 
 
 [dependencies]
-bevy = { version = "0.14.2", features = ["dynamic_linking"] }
-blenvy = "0.1.0-alpha.1"
+bevy = { version = "0.14.2", features = ["dynamic_linking", "file_watcher"] }
+bevy_mod_picking = "0.20.1"
+blenvy = { path = "/home/alec/Code/Vendor/Blenvy/crates/blenvy" }
+fastrand = "2.1.1"
 log = { version = "*", features = ["max_level_debug", "release_max_level_warn"] }
