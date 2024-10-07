@@ -5,6 +5,7 @@ use bevy::{
     prelude::*,
     color::palettes::css::*,
     pbr::CascadeShadowConfigBuilder,
+    animation::AnimationTarget,
     input::{
         keyboard::{KeyboardInput, Key},
     },
@@ -17,7 +18,8 @@ use blenvy::{
 use bevy_mod_picking::prelude::*;
 
 const CAMERA_SCALE: f32 = 0.05;
-const SNAP_DISTANCE: f32 = 15.0;
+const SNAP_DISTANCE: f32 = 25.0;
+
 include!(concat!(env!("OUT_DIR"), "/consts.rs"));
 
 #[derive(Component)]
@@ -26,8 +28,13 @@ pub struct SavedPosition(Transform);
 #[derive(Copy, Clone, Component)]
 pub struct AwaitingPlacement;
 
-#[derive(Component)]
-pub struct Snapped;
+#[derive(Debug, Component)]
+pub struct Snapped {
+    a_entity: Entity,
+    a_anchor: usize,
+    b_entity: Entity,
+    b_anchor: usize,
+}
 
 #[derive(Component, Reflect)]
 #[reflect(Component)]
@@ -49,8 +56,28 @@ pub struct FoundationIdle;
 #[reflect(Component)]
 pub struct BlockTenticle;
 
+#[derive(Component, Reflect)]
+#[reflect(Component)]
+pub struct Water;
+
 #[derive(Default, Resource)]
 pub struct MousePos(Vec2);
+
+#[derive(Default, Component)]
+pub struct Retracting;
+
+#[derive(Default, Component, Reflect)]
+#[reflect(Component)]
+pub struct Extending;
+
+#[derive(Default, Component, Reflect)]
+#[reflect(Component)]
+pub struct Idle;
+
+#[derive(Component, Reflect)]
+#[reflect(Component)]
+pub struct TentacleSpawner(Entity);
+
 
 pub struct BuildPhasePlugin;
 
@@ -65,10 +92,14 @@ impl Plugin for BuildPhasePlugin {
             .register_type::<BlockSpawner>()
             .register_type::<FoundationIdle>()
             .register_type::<BlockTenticle>()
+            .register_type::<SpawnedFrom>()
+            .register_type::<Extending>()
+            .register_type::<Water>()
             .init_resource::<MousePos>()
             .init_resource::<Events<Pointer<Click>>>()
-            .add_systems(Update, (spawn_block, follow_mouse, update_mouse_pos, place_block, save_position, stop_drag))
-            .add_systems(Update, (water_animation_control, tenticle_animation_control))
+            .add_systems(Update, (spawn_block, follow_mouse, update_mouse_pos, save_position, stop_drag, update_tentacle_spawners))
+            .add_systems(PostUpdate, blocks_track_spawners)
+            .add_systems(Update, (water_animation_control, start_retract, tentacle_retracting, tentacle_extending, tentacle_idle))
             .add_systems(Startup, setup);
     }
 }
@@ -116,40 +147,77 @@ fn update_mouse_pos(mut mouse_pos: ResMut<MousePos>, q_windows: Query<&Window, W
     }
 }
 
-fn spawn_block(mut commands: Commands, spawn_points: Query<(Entity, &GlobalTransform), (With<BlockSpawner>, Without<SpawnedBlock>)>) {
-    if let Some((spawner_entity, spawner_transform)) = spawn_points.iter().next() {
-        let path = &BLOCKS[fastrand::usize(0..BLOCKS.len())];
-        let mut transform = Transform::from(spawner_transform.clone()).with_scale(Vec3::ONE);
-        if path.contains("reversable") && fastrand::f32() > 0.5 {
-            transform = transform.with_scale(Vec3::new(-1.0, 1.0, 1.0));
-        };
-        let block_entity = commands.spawn((
-            BlueprintInfo::from_path(path),
-            transform,
-            SpawnBlueprint,
-            HideUntilReady,
-            GameWorldTag,
-            SpawnedFrom(spawner_entity),
-            PickableBundle::default(),
-            On::<Pointer<DragStart>>::listener_insert(AwaitingPlacement),
-            On::<Pointer<DragEnd>>::listener_remove::<AwaitingPlacement>(),
-        )).id();
-        commands.entity(spawner_entity).insert(SpawnedBlock(block_entity));
+fn start_retract(
+    mut commands: Commands,
+    tentacles: Query<(Entity, &TentacleSpawner), With<Idle>>,
+    spawn_points: Query<Entity, (With<BlockSpawner>, Without<SpawnedBlock>)>,
+) {
+    for (entity, tentacle_spawner) in &tentacles {
+        if spawn_points.contains(tentacle_spawner.0) {
+            commands.entity(entity).remove::<Idle>().insert(Retracting);
+        }
     }
 }
 
-fn stop_drag(mut commands: Commands, mut query: Query<(Entity, &SpawnedFrom, &mut Transform, Option<&Snapped>, Option<&SavedPosition>), (Without<AwaitingPlacement>, Or<(With<Snapped>, With<SavedPosition>)>)>, children_query: Query<&Children>) {
+fn spawn_block(
+    mut commands: Commands,
+    tentacles: Query<&TentacleSpawner, With<Extending>>,
+    spawn_points: Query<Entity, (With<BlockSpawner>, Without<SpawnedBlock>)>,
+) {
+    for tentacle_spawner in &tentacles {
+        if let Ok(spawner_entity) = spawn_points.get(tentacle_spawner.0) {
+            let path = &BLOCKS[fastrand::usize(0..BLOCKS.len())];
+            let mut transform = Transform::default();
+            if path.contains("reversable") && fastrand::f32() > 0.5 {
+                transform = transform.with_scale(Vec3::new(-1.0, 1.0, 1.0));
+            };
+            let block_entity = commands.spawn((
+                BlueprintInfo::from_path(path),
+                transform,
+                SpawnBlueprint,
+                HideUntilReady,
+                GameWorldTag,
+                SpawnedFrom(spawner_entity),
+                PickableBundle::default(),
+                On::<Pointer<DragStart>>::listener_insert(AwaitingPlacement),
+                On::<Pointer<DragEnd>>::listener_remove::<AwaitingPlacement>(),
+            )).id();
+            commands.entity(spawner_entity).insert(SpawnedBlock(block_entity));
+        }
+    }
+}
+
+fn stop_drag(
+    mut commands: Commands,
+    mut query: Query<(Entity, &SpawnedFrom, &mut Transform, Option<&mut Snapped>, Option<&SavedPosition>), (Without<AwaitingPlacement>, Or<(With<Snapped>, With<SavedPosition>)>)>,
+    children_query: Query<&Children>,
+    water: Query<&GlobalTransform, With<Water>>,
+    mut anchors: Query<&mut crate::block::Anchors>,
+) {
     for (entity, spawned_from, mut transform, maybe_snapped, maybe_saved) in &mut query {
         commands.entity(entity).remove::<Snapped>().remove::<SavedPosition>();
-        if maybe_snapped.is_none() {
-            if let Some(saved) = maybe_saved {
-                *transform = saved.0.clone();
+        if let Some(Snapped { a_entity, a_anchor, b_entity, b_anchor }) = maybe_snapped.map(|v| v.into_inner()) {
+            if let Ok(mut anchors) = anchors.get_mut(*a_entity) {
+                anchors.0[*a_anchor].2 = Some(*b_entity);
             }
-        } else {
+            if let Ok(mut anchors) = anchors.get_mut(*b_entity) {
+                anchors.0[*b_anchor].2 = Some(*a_entity);
+            }
             commands.entity(spawned_from.0).remove::<SpawnedBlock>();
             commands.entity(entity).insert(Pickable::IGNORE);
             for descendant in children_query.iter_descendants(entity) {
                 commands.entity(descendant).insert(Pickable::IGNORE);
+            }
+        } else {
+            for water_transform in &water {
+                if transform.translation.y < water_transform.translation().y {
+                    commands.entity(entity).despawn_recursive();
+                    commands.entity(spawned_from.0).remove::<SpawnedBlock>().insert(Retracting);
+                    break
+                }
+            }
+            if let Some(saved) = maybe_saved {
+                *transform = saved.0.clone();
             }
         }
     }
@@ -161,32 +229,34 @@ fn save_position(mut commands: Commands, mut query: Query<(Entity, &Transform), 
     }
 }
 
-fn place_block(mut commands: Commands, mouse_button_input: Res<ButtonInput<MouseButton>>, query: Query<Entity, (With<AwaitingPlacement>, With<Snapped>)>) {
-    if mouse_button_input.just_released(MouseButton::Left) {
-        for entity in &query {
-            commands.entity(entity)
-                .remove::<AwaitingPlacement>();
-        }
-    }
-}
-
-fn follow_mouse(mut commands: Commands, mut query: Query<(Entity, &mut Transform, &crate::block::Anchors), With<AwaitingPlacement>>, mouse_pos: Res<MousePos>, others: Query<(&Transform, &crate::block::Anchors), Without<AwaitingPlacement>>) {
+fn follow_mouse(mut commands: Commands, mut query: Query<(Entity, &mut Transform, &crate::block::Anchors), With<AwaitingPlacement>>, mouse_pos: Res<MousePos>, others: Query<(Entity, &Transform, &crate::block::Anchors), Without<AwaitingPlacement>>) {
     for (entity, mut transform, anchors) in &mut query {
-        let mut snapped = false;
+        let mut snapped = None;
 
         transform.rotation = Quat::IDENTITY;
         let mut maybe_pos = transform.translation.clone();
         maybe_pos.x = mouse_pos.0.x;
         maybe_pos.y = mouse_pos.0.y;
 
-        'outer: for (other_transform, other_anchors) in &others {
-            for anchor in &anchors.0 {
-                for other_anchor in &other_anchors.0 {
+        'outer: for (other_entity, other_transform, other_anchors) in &others {
+            for (a_anchor, (anchor, color, bound_entity)) in anchors.0.iter().enumerate() {
+                if bound_entity.is_some() {
+                    continue
+                }
+                for (b_anchor, (other_anchor, other_color, other_bound_entity)) in other_anchors.0.iter().enumerate() {
+                    if other_bound_entity.is_some() || !color.compatible(*other_color) {
+                        continue
+                    }
                     let d = (maybe_pos + *anchor)-(other_transform.translation + *other_anchor);
                     if d.length() < SNAP_DISTANCE*CAMERA_SCALE {
                         maybe_pos.x -= d.x;
                         maybe_pos.y -= d.y;
-                        snapped = true;
+                        snapped = Some(Snapped {
+                            a_entity: entity,
+                            a_anchor,
+                            b_entity: other_entity,
+                            b_anchor,
+                        });
                         break 'outer;
                     }
                 }
@@ -196,8 +266,9 @@ fn follow_mouse(mut commands: Commands, mut query: Query<(Entity, &mut Transform
         transform.translation.x = maybe_pos.x;
         transform.translation.y = maybe_pos.y;
 
-        if snapped {
-            commands.entity(entity).insert(Snapped);
+        if let Some(snapped) = snapped {
+            println!("{snapped:?}");
+            commands.entity(entity).insert(snapped);
         } else {
             commands.entity(entity).remove::<Snapped>();
         }
@@ -211,7 +282,6 @@ pub fn water_animation_control(
 ) {
     if !*done {
         for (link, animations) in animations.iter() {
-            println!("BLAHHH");
             let (mut animation_player, mut transition) =
                 animation_players.get_mut(link.0).unwrap();
             if let Some(animation) = animations.named_indices.get("Idle") {
@@ -224,21 +294,83 @@ pub fn water_animation_control(
     }
 }
 
-pub fn tenticle_animation_control(
-    animations: Query<(&BlueprintAnimationPlayerLink, &BlueprintAnimations), With<BlockTenticle>>,
+pub fn tentacle_idle(
+    animations: Query<(Entity, &BlueprintAnimationPlayerLink, &BlueprintAnimations), With<Idle>>,
     mut animation_players: Query<(&mut AnimationPlayer, &mut AnimationTransitions)>,
-    mut done: Local<bool>
 ) {
-    if !*done {
-        for (link, animations) in animations.iter() {
-            println!("BLAHHH");
-            let (mut animation_player, mut transition) =
-                animation_players.get_mut(link.0).unwrap();
-            if let Some(animation) = animations.named_indices.get("Extend") {
+    for (entity, link, animations) in animations.iter() {
+        let (mut animation_player, mut transition) =
+            animation_players.get_mut(link.0).unwrap();
+        if let Some(idle_animation) = animations.named_indices.get("Extended Idle") {
+            if !animation_player.is_playing_animation(*idle_animation) {
                 transition
-                    .play(&mut animation_player, *animation, std::time::Duration::ZERO)
-                    .repeat();
-                *done = true;
+                    .play(&mut animation_player, *idle_animation, std::time::Duration::from_millis(250))
+                    .repeat()
+                    .set_speed((fastrand::f32()*0.1 + 0.95) * if fastrand::f32() > 0.5 { 1.0 } else { -1.0 })
+                    .seek_to(fastrand::f32()*4.0);
+            }
+        }
+    }
+}
+
+pub fn tentacle_extending(
+    mut commands: Commands,
+    animations: Query<(Entity, &BlueprintAnimationPlayerLink, &BlueprintAnimations), With<Extending>>,
+    mut animation_players: Query<(&mut AnimationPlayer, &mut AnimationTransitions)>,
+) {
+    for (entity, link, animations) in animations.iter() {
+        let (mut animation_player, mut transition) =
+            animation_players.get_mut(link.0).unwrap();
+        if let Some(animation) = animations.named_indices.get("Extend") {
+            if animation_player.is_playing_animation(*animation) {
+                if animation_player.all_finished() {
+                    commands.entity(entity).remove::<Extending>().insert(Idle);
+                }
+            } else {
+                transition
+                    .play(&mut animation_player, *animation, std::time::Duration::ZERO);
+            }
+        }
+    }
+}
+
+pub fn tentacle_retracting(
+    mut commands: Commands,
+    animations: Query<(Entity, &BlueprintAnimationPlayerLink, &BlueprintAnimations), With<Retracting>>,
+    mut animation_players: Query<(&mut AnimationPlayer, &mut AnimationTransitions)>,
+) {
+    for (entity, link, animations) in animations.iter() {
+        let (mut animation_player, mut transition) =
+            animation_players.get_mut(link.0).unwrap();
+        if let Some(animation) = animations.named_indices.get("Retract") {
+            if animation_player.is_playing_animation(*animation) {
+                if animation_player.all_finished() {
+                    commands.entity(entity).remove::<Retracting>().insert(Extending);
+                }
+            } else {
+                transition
+                    .play(&mut animation_player, *animation, std::time::Duration::ZERO);
+            }
+        }
+    }
+}
+
+fn blocks_track_spawners(spawners: Query<(&GlobalTransform, &SpawnedBlock)>, mut blocks: Query<&mut Transform, Without<AwaitingPlacement>>) {
+    for (spawner_transform, spawned_block) in &spawners {
+        if let Ok(mut block_transform) = blocks.get_mut(spawned_block.0) {
+            let (_scale, rotation, translation) = spawner_transform.to_scale_rotation_translation();
+            block_transform.rotation = rotation;
+            block_transform.translation = translation;
+        }
+    }
+}
+
+fn update_tentacle_spawners(mut commands: Commands, query: Query<Entity, (With<BlockTenticle>, Without<TentacleSpawner>)>, children: Query<&Children>, spawners: Query<Entity, With<BlockSpawner>>) {
+    for tentacle_entity in &query {
+        for descendant in children.iter_descendants(tentacle_entity) {
+            if let Ok(spawner_entity) = spawners.get(descendant) {
+                commands.entity(tentacle_entity).insert(TentacleSpawner(spawner_entity));
+                break;
             }
         }
     }

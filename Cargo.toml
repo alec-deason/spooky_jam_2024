@@ -22,6 +22,7 @@ strip = "debuginfo"
 
 [dependencies]
 bevy = { version = "0.14.2", features = ["dynamic_linking", "file_watcher"] }
+bevy-inspector-egui = "0.26.0"
 bevy_mod_picking = "0.20.1"
 blenvy = { path = "/home/alec/Code/Vendor/Blenvy/crates/blenvy" }
 fastrand = "2.1.1"

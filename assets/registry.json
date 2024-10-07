@@ -14562,15 +14562,32 @@
       "typeInfo": "Value"
     },
     "spooky_jam::block::Anchor": {
-      "additionalProperties": false,
       "isComponent": true,
       "isResource": false,
+      "items": false,
       "long_name": "spooky_jam::block::Anchor",
-      "properties": {},
-      "required": [],
+      "prefixItems": [
+        {
+          "type": {
+            "$ref": "#/$defs/spooky_jam::block::AnchorColor"
+          }
+        }
+      ],
       "short_name": "Anchor",
-      "type": "object",
-      "typeInfo": "Struct"
+      "type": "array",
+      "typeInfo": "TupleStruct"
+    },
+    "spooky_jam::block::AnchorColor": {
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "spooky_jam::block::AnchorColor",
+      "oneOf": [
+        "Up",
+        "Down"
+      ],
+      "short_name": "AnchorColor",
+      "type": "string",
+      "typeInfo": "Enum"
     },
     "spooky_jam::block::Block": {
       "additionalProperties": false,
@@ -14616,6 +14633,17 @@
       "type": "object",
       "typeInfo": "Struct"
     },
+    "spooky_jam::build_phase::Extending": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "spooky_jam::build_phase::Extending",
+      "properties": {},
+      "required": [],
+      "short_name": "Extending",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
     "spooky_jam::build_phase::FoundationIdle": {
       "additionalProperties": false,
       "isComponent": true,
@@ -14624,6 +14652,33 @@
       "properties": {},
       "required": [],
       "short_name": "FoundationIdle",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "spooky_jam::build_phase::SpawnedFrom": {
+      "isComponent": true,
+      "isResource": false,
+      "items": false,
+      "long_name": "spooky_jam::build_phase::SpawnedFrom",
+      "prefixItems": [
+        {
+          "type": {
+            "$ref": "#/$defs/bevy_ecs::entity::Entity"
+          }
+        }
+      ],
+      "short_name": "SpawnedFrom",
+      "type": "array",
+      "typeInfo": "TupleStruct"
+    },
+    "spooky_jam::build_phase::Water": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "spooky_jam::build_phase::Water",
+      "properties": {},
+      "required": [],
+      "short_name": "Water",
       "type": "object",
       "typeInfo": "Struct"
     },
