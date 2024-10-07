@@ -3,3 +3,5 @@
 assets/levels
 assets/materials
 assets/blueprints
+*.ts
+*.wasm
