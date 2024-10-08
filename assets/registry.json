@@ -14561,6 +14561,17 @@
       "type": "object",
       "typeInfo": "Value"
     },
+    "spooky_jam::FoundationIdle": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "spooky_jam::FoundationIdle",
+      "properties": {},
+      "required": [],
+      "short_name": "FoundationIdle",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
     "spooky_jam::block::Anchor": {
       "isComponent": true,
       "isResource": false,
@@ -14645,14 +14656,14 @@
       "type": "object",
       "typeInfo": "Struct"
     },
-    "spooky_jam::build_phase::FoundationIdle": {
+    "spooky_jam::build_phase::Foundation": {
       "additionalProperties": false,
       "isComponent": true,
       "isResource": false,
-      "long_name": "spooky_jam::build_phase::FoundationIdle",
+      "long_name": "spooky_jam::build_phase::Foundation",
       "properties": {},
       "required": [],
-      "short_name": "FoundationIdle",
+      "short_name": "Foundation",
       "type": "object",
       "typeInfo": "Struct"
     },
