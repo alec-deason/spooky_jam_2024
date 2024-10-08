@@ -1,6 +1,5 @@
 use bevy::{
     prelude::*,
-    window::PrimaryWindow,
 };
 use blenvy::{
     BlueprintAnimationPlayerLink, BlueprintAnimations, BlueprintInfo, GameWorldTag,
@@ -8,18 +7,14 @@ use blenvy::{
 };
 use bevy_mod_picking::prelude::*;
 
+use crate::{SNAP_DISTANCE, CAMERA_SCALE, SavedPosition, Spawned, SpawnedFrom, Spawner, environmental_decoration::{Water, Sky}, MousePos, BLOCKS};
+
 #[derive(States, Debug, Clone, PartialEq, Eq, Hash)]
 enum PhasePhase {
     Running,
     ShuttingDown,
 }
 
-const SNAP_DISTANCE: f32 = 25.0;
-
-include!(concat!(env!("OUT_DIR"), "/consts.rs"));
-
-#[derive(Component)]
-pub struct SavedPosition(Transform);
 
 #[derive(Copy, Clone, Component)]
 pub struct AwaitingPlacement;
@@ -37,31 +32,12 @@ pub struct Snapped {
 
 #[derive(Component, Reflect)]
 #[reflect(Component)]
-pub struct BlockSpawner;
-
-#[derive(Component, Reflect)]
-#[reflect(Component)]
 pub struct Foundation;
 
-#[derive(Component, Reflect)]
-#[reflect(Component)]
-pub struct SpawnedFrom(Entity);
 
 #[derive(Component, Reflect)]
 #[reflect(Component)]
-pub struct SpawnedBlock(Entity);
-
-
-#[derive(Component, Reflect)]
-#[reflect(Component)]
-pub struct BlockTenticle;
-
-#[derive(Component, Reflect)]
-#[reflect(Component)]
-pub struct Water;
-
-#[derive(Default, Resource)]
-pub struct MousePos(Vec2);
+pub struct Tentacle;
 
 #[derive(Default, Component)]
 pub struct Retracting;
@@ -93,13 +69,9 @@ impl Plugin for BuildPhasePlugin {
     fn build(&self, app: &mut App) {
         app
             .insert_state(PhasePhase::Running)
-            .register_type::<BlockSpawner>()
-            .register_type::<BlockTenticle>()
-            .register_type::<SpawnedFrom>()
+            .register_type::<Tentacle>()
             .register_type::<Extending>()
-            .register_type::<Water>()
             .register_type::<Foundation>()
-            .init_resource::<MousePos>()
             .init_resource::<Events<Pointer<Click>>>()
 
             .add_systems(Update, (start_retract, tentacle_retracting, tentacle_extending, tentacle_idle).run_if(in_state(crate::GameState::BuildPhase)))
@@ -107,18 +79,17 @@ impl Plugin for BuildPhasePlugin {
             .add_systems(Update, (
                 spawn_block,
                 follow_mouse,
-                update_mouse_pos,
                 start_drag,
                 stop_drag,
                 update_tentacle_spawners,
                 clear_blocked_anchors,
             ).run_if(in_state(crate::GameState::BuildPhase)).run_if(in_state(PhasePhase::Running)))
-            .add_systems(PostUpdate, (check_completion, blocks_track_spawners).run_if(in_state(crate::GameState::BuildPhase)))
+            .add_systems(PostUpdate, (check_completion.run_if(in_state(PhasePhase::Running)), blocks_track_spawners).run_if(in_state(crate::GameState::BuildPhase)))
             .add_systems(OnEnter(crate::GameState::BuildPhase), setup)
             .add_systems(OnEnter(crate::GameState::BuildPhase), |mut next_state: ResMut<NextState<PhasePhase>>| { next_state.set(PhasePhase::Running) })
 
             .add_systems(OnEnter(PhasePhase::ShuttingDown), retract_tentacles)
-            .add_systems(Update, check_shutdown_completion.run_if(in_state(PhasePhase::ShuttingDown)))
+            .add_systems(Update, (retract_tentacles, check_shutdown_completion).run_if(in_state(PhasePhase::ShuttingDown)))
             .add_systems(OnExit(crate::GameState::BuildPhase), (despawn_tentacles, despawn_spare_blocks))
             ;
     }
@@ -130,7 +101,7 @@ fn setup(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, asset_server:
             transform: Transform::from_xyz(0.0, 0.0, 10.0)
                 .looking_at(Vec3::new(0.0, 0.0, 0.0), Vec3::Y),
             projection: OrthographicProjection {
-                scale: crate::CAMERA_SCALE,
+                scale: CAMERA_SCALE,
                 ..default()
             }.into(),
             ..default()
@@ -157,20 +128,11 @@ fn setup(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, asset_server:
     ));
 }
 
-fn update_mouse_pos(mut mouse_pos: ResMut<MousePos>, q_windows: Query<&Window, With<PrimaryWindow>>) {
-    let window = q_windows.single();
-    if let Some(position) = window.cursor_position() {
-        mouse_pos.0.x = (position.x - window.width() / 2.0) * crate::CAMERA_SCALE;
-        mouse_pos.0.y = -(position.y - window.height() / 2.0) * crate::CAMERA_SCALE;
-    } else {
-        mouse_pos.0 = Vec2::new(0.0, 0.0);
-    }
-}
 
 fn start_retract(
     mut commands: Commands,
     tentacles: Query<(Entity, &TentacleSpawner), With<Idle>>,
-    spawn_points: Query<Entity, (With<BlockSpawner>, Without<SpawnedBlock>)>,
+    spawn_points: Query<Entity, (With<Spawner>, Without<Spawned>)>,
 ) {
     for (entity, tentacle_spawner) in &tentacles {
         if spawn_points.contains(tentacle_spawner.0) {
@@ -182,7 +144,7 @@ fn start_retract(
 fn spawn_block(
     mut commands: Commands,
     tentacles: Query<&TentacleSpawner, With<Extending>>,
-    spawn_points: Query<Entity, (With<BlockSpawner>, Without<SpawnedBlock>)>,
+    spawn_points: Query<Entity, (With<Spawner>, Without<Spawned>)>,
 ) {
     for tentacle_spawner in &tentacles {
         if let Ok(spawner_entity) = spawn_points.get(tentacle_spawner.0) {
@@ -203,7 +165,7 @@ fn spawn_block(
                 On::<Pointer<DragStart>>::listener_insert(AwaitingPlacement),
                 On::<Pointer<DragEnd>>::listener_remove::<AwaitingPlacement>(),
             )).id();
-            commands.entity(spawner_entity).insert(SpawnedBlock(block_entity));
+            commands.entity(spawner_entity).insert(Spawned(block_entity));
         }
     }
 }
@@ -224,7 +186,7 @@ fn stop_drag(
             if let Ok(mut anchors) = anchors.get_mut(*b_entity) {
                 anchors.0[*b_anchor].2 = Some(*a_entity);
             }
-            commands.entity(spawned_from.0).remove::<SpawnedBlock>();
+            commands.entity(spawned_from.0).remove::<Spawned>();
             commands.entity(entity).remove::<OnTentacle>().insert(Pickable::IGNORE).insert(NeedsClearance);
             for descendant in children_query.iter_descendants(entity) {
                 commands.entity(descendant).insert(Pickable::IGNORE);
@@ -233,7 +195,7 @@ fn stop_drag(
             for water_transform in &water {
                 if transform.translation.y < water_transform.translation().y {
                     commands.entity(entity).despawn_recursive();
-                    commands.entity(spawned_from.0).remove::<SpawnedBlock>().insert(Retracting);
+                    commands.entity(spawned_from.0).remove::<Spawned>().insert(Retracting);
                     break
                 }
             }
@@ -273,7 +235,7 @@ fn follow_mouse(mut commands: Commands, mut query: Query<(Entity, &mut Transform
                         continue
                     }
                     let d = (maybe_pos + *anchor)-(other_transform.translation + *other_anchor);
-                    if d.length() < SNAP_DISTANCE*crate::CAMERA_SCALE {
+                    if d.length() < SNAP_DISTANCE*CAMERA_SCALE {
                         maybe_pos.x -= d.x;
                         maybe_pos.y -= d.y;
                         snapped = Some(Snapped {
@@ -364,7 +326,7 @@ pub fn tentacle_retracting(
     }
 }
 
-fn blocks_track_spawners(spawners: Query<(&GlobalTransform, &SpawnedBlock)>, mut blocks: Query<&mut Transform, Without<AwaitingPlacement>>) {
+fn blocks_track_spawners(spawners: Query<(&GlobalTransform, &Spawned)>, mut blocks: Query<&mut Transform, Without<AwaitingPlacement>>) {
     for (spawner_transform, spawned_block) in &spawners {
         if let Ok(mut block_transform) = blocks.get_mut(spawned_block.0) {
             let (_scale, rotation, translation) = spawner_transform.to_scale_rotation_translation();
@@ -374,7 +336,7 @@ fn blocks_track_spawners(spawners: Query<(&GlobalTransform, &SpawnedBlock)>, mut
     }
 }
 
-fn update_tentacle_spawners(mut commands: Commands, query: Query<Entity, (With<BlockTenticle>, Without<TentacleSpawner>)>, children: Query<&Children>, spawners: Query<Entity, With<BlockSpawner>>) {
+fn update_tentacle_spawners(mut commands: Commands, query: Query<Entity, (With<Tentacle>, Without<TentacleSpawner>)>, children: Query<&Children>, spawners: Query<Entity, With<Spawner>>) {
     for tentacle_entity in &query {
         for descendant in children.iter_descendants(tentacle_entity) {
             if let Ok(spawner_entity) = spawners.get(descendant) {
@@ -399,7 +361,7 @@ fn clear_blocked_anchors(mut commands: Commands, mut newly_placed: Query<(Entity
                         return true;
                     }
                     let d = (transform.translation() + *anchor)-(other_transform.translation() + *other_anchor);
-                    if d.length() < SNAP_DISTANCE*crate::CAMERA_SCALE {
+                    if d.length() < SNAP_DISTANCE*CAMERA_SCALE {
                         retain = false;
                         false
                     } else {
@@ -414,7 +376,7 @@ fn clear_blocked_anchors(mut commands: Commands, mut newly_placed: Query<(Entity
 
 fn check_completion(
     query: Query<&crate::block::Anchors, Without<OnTentacle>>,
-    mut sky: Query<&mut crate::Sky>,
+    mut sky: Query<&mut Sky>,
     time: Res<Time>,
     mut next_state: ResMut<NextState<PhasePhase>>,
 ) {
@@ -439,13 +401,13 @@ fn check_completion(
     }
 }
 
-fn retract_tentacles(mut commands: Commands, query: Query<Entity, (With<BlockTenticle>, Without<Extending>, Without<Dead>)>) {
+fn retract_tentacles(mut commands: Commands, query: Query<Entity, (With<Tentacle>, Without<Extending>, Without<Dead>)>) {
     for entity in &query {
         commands.entity(entity).remove::<Idle>().insert(Retracting).insert(Dead);
     }
 }
 
-fn despawn_tentacles(mut commands: Commands, query: Query<Entity, With<BlockTenticle>>) {
+fn despawn_tentacles(mut commands: Commands, query: Query<Entity, With<Tentacle>>) {
     for entity in &query {
         commands.entity(entity).despawn_recursive();
     }
@@ -459,7 +421,7 @@ fn despawn_spare_blocks(mut commands: Commands, query: Query<Entity, With<OnTent
 
 fn check_shutdown_completion(
     mut next_state: ResMut<NextState<crate::GameState>>,
-    query: Query<Entity, (With<BlockTenticle>, With<Dead>, Or<(With<Extending>, With<Retracting>)>)>,
+    query: Query<Entity, (With<Tentacle>, With<Dead>, Or<(With<Extending>, With<Retracting>)>)>,
 ) {
     if query.is_empty() {
         next_state.set(crate::GameState::DecayPhase)

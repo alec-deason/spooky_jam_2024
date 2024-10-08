@@ -14561,21 +14561,166 @@
       "type": "object",
       "typeInfo": "Value"
     },
-    "spooky_jam::FoundationIdle": {
+    "spooky_jam::SpawnedFrom": {
+      "isComponent": true,
+      "isResource": false,
+      "items": false,
+      "long_name": "spooky_jam::SpawnedFrom",
+      "prefixItems": [
+        {
+          "type": {
+            "$ref": "#/$defs/bevy_ecs::entity::Entity"
+          }
+        }
+      ],
+      "short_name": "SpawnedFrom",
+      "type": "array",
+      "typeInfo": "TupleStruct"
+    },
+    "spooky_jam::Spawner": {
       "additionalProperties": false,
       "isComponent": true,
       "isResource": false,
-      "long_name": "spooky_jam::FoundationIdle",
+      "long_name": "spooky_jam::Spawner",
+      "properties": {},
+      "required": [],
+      "short_name": "Spawner",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "spooky_jam::block::Anchor": {
+      "isComponent": true,
+      "isResource": false,
+      "items": false,
+      "long_name": "spooky_jam::block::Anchor",
+      "prefixItems": [
+        {
+          "type": {
+            "$ref": "#/$defs/spooky_jam::block::AnchorColor"
+          }
+        }
+      ],
+      "short_name": "Anchor",
+      "type": "array",
+      "typeInfo": "TupleStruct"
+    },
+    "spooky_jam::block::AnchorColor": {
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "spooky_jam::block::AnchorColor",
+      "oneOf": [
+        "Up",
+        "Down",
+        "None"
+      ],
+      "short_name": "AnchorColor",
+      "type": "string",
+      "typeInfo": "Enum"
+    },
+    "spooky_jam::block::Block": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "spooky_jam::block::Block",
+      "properties": {},
+      "required": [],
+      "short_name": "Block",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "spooky_jam::block::DisasterTarget": {
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "spooky_jam::block::DisasterTarget",
+      "oneOf": [
+        "All"
+      ],
+      "short_name": "DisasterTarget",
+      "type": "string",
+      "typeInfo": "Enum"
+    },
+    "spooky_jam::block::MouseAnchor": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "spooky_jam::block::MouseAnchor",
+      "properties": {},
+      "required": [],
+      "short_name": "MouseAnchor",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "spooky_jam::build_phase::Extending": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "spooky_jam::build_phase::Extending",
+      "properties": {},
+      "required": [],
+      "short_name": "Extending",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "spooky_jam::build_phase::Foundation": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "spooky_jam::build_phase::Foundation",
+      "properties": {},
+      "required": [],
+      "short_name": "Foundation",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "spooky_jam::build_phase::Tentacle": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "spooky_jam::build_phase::Tentacle",
+      "properties": {},
+      "required": [],
+      "short_name": "Tentacle",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "spooky_jam::decay_phase::Disaster": {
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "spooky_jam::decay_phase::Disaster",
+      "oneOf": [
+        "Lightning",
+        "Fire"
+      ],
+      "short_name": "Disaster",
+      "type": "string",
+      "typeInfo": "Enum"
+    },
+    "spooky_jam::decay_phase::DisasterSpawner": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "spooky_jam::decay_phase::DisasterSpawner",
+      "properties": {},
+      "required": [],
+      "short_name": "DisasterSpawner",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "spooky_jam::environmental_decoration::FoundationIdle": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "spooky_jam::environmental_decoration::FoundationIdle",
       "properties": {},
       "required": [],
       "short_name": "FoundationIdle",
       "type": "object",
       "typeInfo": "Struct"
     },
-    "spooky_jam::Sky": {
+    "spooky_jam::environmental_decoration::Sky": {
       "isComponent": true,
       "isResource": false,
-      "long_name": "spooky_jam::Sky",
+      "long_name": "spooky_jam::environmental_decoration::Sky",
       "oneOf": [
         {
           "items": false,
@@ -14654,133 +14799,22 @@
       "type": "object",
       "typeInfo": "Enum"
     },
-    "spooky_jam::Star": {
+    "spooky_jam::environmental_decoration::Star": {
       "additionalProperties": false,
       "isComponent": true,
       "isResource": false,
-      "long_name": "spooky_jam::Star",
+      "long_name": "spooky_jam::environmental_decoration::Star",
       "properties": {},
       "required": [],
       "short_name": "Star",
       "type": "object",
       "typeInfo": "Struct"
     },
-    "spooky_jam::block::Anchor": {
-      "isComponent": true,
-      "isResource": false,
-      "items": false,
-      "long_name": "spooky_jam::block::Anchor",
-      "prefixItems": [
-        {
-          "type": {
-            "$ref": "#/$defs/spooky_jam::block::AnchorColor"
-          }
-        }
-      ],
-      "short_name": "Anchor",
-      "type": "array",
-      "typeInfo": "TupleStruct"
-    },
-    "spooky_jam::block::AnchorColor": {
-      "isComponent": false,
-      "isResource": false,
-      "long_name": "spooky_jam::block::AnchorColor",
-      "oneOf": [
-        "Up",
-        "Down",
-        "None"
-      ],
-      "short_name": "AnchorColor",
-      "type": "string",
-      "typeInfo": "Enum"
-    },
-    "spooky_jam::block::Block": {
+    "spooky_jam::environmental_decoration::Water": {
       "additionalProperties": false,
       "isComponent": true,
       "isResource": false,
-      "long_name": "spooky_jam::block::Block",
-      "properties": {},
-      "required": [],
-      "short_name": "Block",
-      "type": "object",
-      "typeInfo": "Struct"
-    },
-    "spooky_jam::block::MouseAnchor": {
-      "additionalProperties": false,
-      "isComponent": true,
-      "isResource": false,
-      "long_name": "spooky_jam::block::MouseAnchor",
-      "properties": {},
-      "required": [],
-      "short_name": "MouseAnchor",
-      "type": "object",
-      "typeInfo": "Struct"
-    },
-    "spooky_jam::build_phase::BlockSpawner": {
-      "additionalProperties": false,
-      "isComponent": true,
-      "isResource": false,
-      "long_name": "spooky_jam::build_phase::BlockSpawner",
-      "properties": {},
-      "required": [],
-      "short_name": "BlockSpawner",
-      "type": "object",
-      "typeInfo": "Struct"
-    },
-    "spooky_jam::build_phase::BlockTenticle": {
-      "additionalProperties": false,
-      "isComponent": true,
-      "isResource": false,
-      "long_name": "spooky_jam::build_phase::BlockTenticle",
-      "properties": {},
-      "required": [],
-      "short_name": "BlockTenticle",
-      "type": "object",
-      "typeInfo": "Struct"
-    },
-    "spooky_jam::build_phase::Extending": {
-      "additionalProperties": false,
-      "isComponent": true,
-      "isResource": false,
-      "long_name": "spooky_jam::build_phase::Extending",
-      "properties": {},
-      "required": [],
-      "short_name": "Extending",
-      "type": "object",
-      "typeInfo": "Struct"
-    },
-    "spooky_jam::build_phase::Foundation": {
-      "additionalProperties": false,
-      "isComponent": true,
-      "isResource": false,
-      "long_name": "spooky_jam::build_phase::Foundation",
-      "properties": {},
-      "required": [],
-      "short_name": "Foundation",
-      "type": "object",
-      "typeInfo": "Struct"
-    },
-    "spooky_jam::build_phase::SpawnedFrom": {
-      "isComponent": true,
-      "isResource": false,
-      "items": false,
-      "long_name": "spooky_jam::build_phase::SpawnedFrom",
-      "prefixItems": [
-        {
-          "type": {
-            "$ref": "#/$defs/bevy_ecs::entity::Entity"
-          }
-        }
-      ],
-      "short_name": "SpawnedFrom",
-      "type": "array",
-      "typeInfo": "TupleStruct"
-    },
-    "spooky_jam::build_phase::Water": {
-      "additionalProperties": false,
-      "isComponent": true,
-      "isResource": false,
-      "long_name": "spooky_jam::build_phase::Water",
+      "long_name": "spooky_jam::environmental_decoration::Water",
       "properties": {},
       "required": [],
       "short_name": "Water",

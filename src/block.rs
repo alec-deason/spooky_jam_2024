@@ -5,6 +5,12 @@ use bevy_mod_picking::prelude::*;
 #[reflect(Component)]
 pub struct Block;
 
+#[derive(Component, Reflect)]
+#[reflect(Component)]
+pub enum DisasterTarget {
+    All
+}
+
 #[derive(Copy, Clone, Debug, Component, Reflect, PartialEq)]
 pub enum AnchorColor {
     Up,
@@ -41,6 +47,7 @@ impl Plugin for BlockPlugin {
         app
             .register_type::<Anchor>()
             .register_type::<AnchorColor>()
+            .register_type::<DisasterTarget>()
             .register_type::<MouseAnchor>()
             .register_type::<Pickable>()
             .register_type::<PickingInteraction>()
