@@ -76,8 +76,12 @@ pub struct Idle;
 
 #[derive(Component, Reflect)]
 #[reflect(Component)]
-pub struct TentacleSpawner(Entity);
+pub struct NeedsClearance;
 
+
+#[derive(Component, Reflect)]
+#[reflect(Component)]
+pub struct TentacleSpawner(Entity);
 
 pub struct BuildPhasePlugin;
 
@@ -97,7 +101,7 @@ impl Plugin for BuildPhasePlugin {
             .register_type::<Water>()
             .init_resource::<MousePos>()
             .init_resource::<Events<Pointer<Click>>>()
-            .add_systems(Update, (spawn_block, follow_mouse, update_mouse_pos, save_position, stop_drag, update_tentacle_spawners))
+            .add_systems(Update, (spawn_block, follow_mouse, update_mouse_pos, save_position, stop_drag, update_tentacle_spawners, clear_blocked_anchors))
             .add_systems(PostUpdate, blocks_track_spawners)
             .add_systems(Update, (water_animation_control, start_retract, tentacle_retracting, tentacle_extending, tentacle_idle))
             .add_systems(Startup, setup);
@@ -204,7 +208,7 @@ fn stop_drag(
                 anchors.0[*b_anchor].2 = Some(*a_entity);
             }
             commands.entity(spawned_from.0).remove::<SpawnedBlock>();
-            commands.entity(entity).insert(Pickable::IGNORE);
+            commands.entity(entity).insert(Pickable::IGNORE).insert(NeedsClearance);
             for descendant in children_query.iter_descendants(entity) {
                 commands.entity(descendant).insert(Pickable::IGNORE);
             }
@@ -267,7 +271,6 @@ fn follow_mouse(mut commands: Commands, mut query: Query<(Entity, &mut Transform
         transform.translation.y = maybe_pos.y;
 
         if let Some(snapped) = snapped {
-            println!("{snapped:?}");
             commands.entity(entity).insert(snapped);
         } else {
             commands.entity(entity).remove::<Snapped>();
@@ -372,6 +375,34 @@ fn update_tentacle_spawners(mut commands: Commands, query: Query<Entity, (With<B
                 commands.entity(tentacle_entity).insert(TentacleSpawner(spawner_entity));
                 break;
             }
+        }
+    }
+}
+
+fn clear_blocked_anchors(mut commands: Commands, mut newly_placed: Query<(Entity, &GlobalTransform, &mut crate::block::Anchors), With<NeedsClearance>>, mut others: Query<(&GlobalTransform, &mut crate::block::Anchors), Without<NeedsClearance>>) {
+    for (entity, transform, mut anchors) in &mut newly_placed {
+        commands.entity(entity).remove::<NeedsClearance>();
+        println!("POOP");
+        for (other_transform, mut other_anchors) in &mut others {
+            anchors.0.retain(|(anchor, _color, bound_entity)| {
+                if bound_entity.is_some() {
+                    return true;
+                }
+                let mut retain = true;
+                other_anchors.0.retain(|(other_anchor, _other_color, other_bound_entity)| {
+                    if other_bound_entity.is_some() {
+                        return true;
+                    }
+                    let d = (transform.translation() + *anchor)-(other_transform.translation() + *other_anchor);
+                    if d.length() < SNAP_DISTANCE*CAMERA_SCALE {
+                        retain = false;
+                        false
+                    } else {
+                        true
+                    }
+                });
+                retain
+            });
         }
     }
 }

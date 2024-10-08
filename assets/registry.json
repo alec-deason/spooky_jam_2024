@@ -14583,7 +14583,8 @@
       "long_name": "spooky_jam::block::AnchorColor",
       "oneOf": [
         "Up",
-        "Down"
+        "Down",
+        "None"
       ],
       "short_name": "AnchorColor",
       "type": "string",

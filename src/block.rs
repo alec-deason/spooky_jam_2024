@@ -8,7 +8,8 @@ pub struct Block;
 #[derive(Copy, Clone, Debug, Component, Reflect, PartialEq)]
 pub enum AnchorColor {
     Up,
-    Down
+    Down,
+    None,
 }
 
 impl AnchorColor {
@@ -16,6 +17,7 @@ impl AnchorColor {
         match self {
             AnchorColor::Up => other == AnchorColor::Down,
             AnchorColor::Down => other == AnchorColor::Up,
+            AnchorColor::None => false,
         }
     }
 }
