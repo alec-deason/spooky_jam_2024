@@ -14572,6 +14572,99 @@
       "type": "object",
       "typeInfo": "Struct"
     },
+    "spooky_jam::Sky": {
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "spooky_jam::Sky",
+      "oneOf": [
+        {
+          "items": false,
+          "long_name": "Color",
+          "prefixItems": [
+            {
+              "type": {
+                "$ref": "#/$defs/bevy_color::color::Color"
+              }
+            },
+            {
+              "type": {
+                "$ref": "#/$defs/f32"
+              }
+            }
+          ],
+          "short_name": "Color",
+          "type": "array",
+          "typeInfo": "Tuple"
+        },
+        {
+          "additionalProperties": false,
+          "long_name": "Transition",
+          "properties": {
+            "end_color": {
+              "long_name": "end_color",
+              "type": {
+                "$ref": "#/$defs/bevy_color::color::Color"
+              }
+            },
+            "end_star_brightness": {
+              "long_name": "end_star_brightness",
+              "type": {
+                "$ref": "#/$defs/f32"
+              }
+            },
+            "end_time": {
+              "long_name": "end_time",
+              "type": {
+                "$ref": "#/$defs/bevy_utils::Duration"
+              }
+            },
+            "start_color": {
+              "long_name": "start_color",
+              "type": {
+                "$ref": "#/$defs/bevy_color::color::Color"
+              }
+            },
+            "start_star_brightness": {
+              "long_name": "start_star_brightness",
+              "type": {
+                "$ref": "#/$defs/f32"
+              }
+            },
+            "start_time": {
+              "long_name": "start_time",
+              "type": {
+                "$ref": "#/$defs/bevy_utils::Duration"
+              }
+            }
+          },
+          "required": [
+            "start_color",
+            "end_color",
+            "start_time",
+            "end_time",
+            "start_star_brightness",
+            "end_star_brightness"
+          ],
+          "short_name": "Transition",
+          "type": "object",
+          "typeInfo": "Struct"
+        }
+      ],
+      "short_name": "Sky",
+      "type": "object",
+      "typeInfo": "Enum"
+    },
+    "spooky_jam::Star": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "spooky_jam::Star",
+      "properties": {},
+      "required": [],
+      "short_name": "Star",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
     "spooky_jam::block::Anchor": {
       "isComponent": true,
       "isResource": false,

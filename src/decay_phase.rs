@@ -14,11 +14,7 @@ impl Plugin for DecayPhasePlugin {
         app
             .insert_state(PhasePhase::Running)
             .add_systems(OnEnter(crate::GameState::DecayPhase), |mut next_state: ResMut<NextState<PhasePhase>>| { next_state.set(PhasePhase::Running) })
-            .add_systems(Update, (poop).run_if(in_state(PhasePhase::Running)).run_if(in_state(crate::GameState::DecayPhase)))
+            //.add_systems(Update, (poop).run_if(in_state(PhasePhase::Running)).run_if(in_state(crate::GameState::DecayPhase)))
             ;
     }
-}
-
-fn poop() {
-    println!("POOP");
 }

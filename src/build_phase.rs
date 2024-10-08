@@ -414,6 +414,8 @@ fn clear_blocked_anchors(mut commands: Commands, mut newly_placed: Query<(Entity
 
 fn check_completion(
     query: Query<&crate::block::Anchors, Without<OnTentacle>>,
+    mut sky: Query<&mut crate::Sky>,
+    time: Res<Time>,
     mut next_state: ResMut<NextState<PhasePhase>>,
 ) {
     let mut done = None;
@@ -430,6 +432,9 @@ fn check_completion(
     }
 
     if done.unwrap_or(false) {
+        for mut sky in &mut sky {
+            sky.to_night(time.elapsed());
+        }
         next_state.set(PhasePhase::ShuttingDown);
     }
 }
