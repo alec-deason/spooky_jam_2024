@@ -7,7 +7,7 @@ use blenvy::{
 };
 use bevy_mod_picking::prelude::*;
 
-use crate::{SNAP_DISTANCE, CAMERA_SCALE, SavedPosition, Spawned, SpawnedFrom, Spawner, environmental_decoration::{Water, Sky}, MousePos, BLOCKS};
+use crate::{SNAP_DISTANCE, CAMERA_SCALE, SavedPosition, Spawned, SpawnedFrom, Spawner, environmental_decoration::{Water, Sky}, MousePos, BLOCKS, block::DecayedRepresentation, Lift};
 
 #[derive(States, Debug, Clone, PartialEq, Eq, Hash)]
 enum PhasePhase {
@@ -95,7 +95,7 @@ impl Plugin for BuildPhasePlugin {
     }
 }
 
-fn setup(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, asset_server: Res<AssetServer>, mut materials: ResMut<Assets<StandardMaterial>>,) {
+fn setup(mut commands: Commands) {
     commands.spawn((
         Camera3dBundle {
             transform: Transform::from_xyz(0.0, 0.0, 10.0)
@@ -107,18 +107,6 @@ fn setup(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, asset_server:
             ..default()
         },
     ));
-    /*
-    commands.spawn(DirectionalLightBundle {
-        directional_light: DirectionalLight {
-            illuminance: light_consts::lux::OVERCAST_DAY,
-            shadows_enabled: true,
-            ..default()
-        },
-        transform: Transform::from_xyz(20.0, 0.0, 10.0)
-            .looking_at(Vec3::new(0.0, 0.0, 0.0), -Vec3::Y),
-        ..default()
-    });
-    */
     commands.spawn((
         BlueprintInfo::from_path("levels/_foundation.glb"),
         Transform::from_translation(Vec3::new(0.0, 0.0, 0.0)),
@@ -161,6 +149,7 @@ fn spawn_block(
                 GameWorldTag,
                 OnTentacle,
                 SpawnedFrom(spawner_entity),
+                Lift::<DecayedRepresentation>::default(),
                 PickableBundle::default(),
                 On::<Pointer<DragStart>>::listener_insert(AwaitingPlacement),
                 On::<Pointer<DragEnd>>::listener_remove::<AwaitingPlacement>(),
@@ -263,10 +252,10 @@ fn follow_mouse(mut commands: Commands, mut query: Query<(Entity, &mut Transform
 
 
 pub fn tentacle_idle(
-    animations: Query<(Entity, &BlueprintAnimationPlayerLink, &BlueprintAnimations), With<Idle>>,
+    animations: Query<(&BlueprintAnimationPlayerLink, &BlueprintAnimations), With<Idle>>,
     mut animation_players: Query<(&mut AnimationPlayer, &mut AnimationTransitions)>,
 ) {
-    for (entity, link, animations) in animations.iter() {
+    for (link, animations) in animations.iter() {
         let (mut animation_player, mut transition) =
             animation_players.get_mut(link.0).unwrap();
         if let Some(idle_animation) = animations.named_indices.get("Extended Idle") {

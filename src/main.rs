@@ -44,6 +44,14 @@ pub struct SavedPosition(Transform);
 #[derive(Default, Resource)]
 pub struct MousePos(Vec2);
 
+#[derive(Copy, Clone, Component)]
+struct Lift<T>(std::marker::PhantomData<T>);
+impl <T> Default for Lift<T> {
+    fn default() -> Self {
+        Lift(Default::default())
+    }
+}
+
 
 fn main() {
     App::new()
@@ -86,3 +94,19 @@ fn update_mouse_pos(mut mouse_pos: ResMut<MousePos>, q_windows: Query<&Window, W
     }
 }
 
+
+pub fn lift_component<T: Component + Clone>(
+    mut commands: Commands,
+    query: Query<(Entity, &T), Without<BlueprintInfo>>,
+    main_blueprint: Query<Entity, With<BlueprintInfo>>,
+    parents: Query<&Parent>,
+) {
+    for (src_entity, component) in &query {
+        commands.entity(src_entity).remove::<T>();
+        for ancestor in parents.iter_ancestors(src_entity) {
+            if main_blueprint.contains(ancestor) {
+                commands.entity(ancestor).insert(component.clone());
+            }
+        }
+    }
+}

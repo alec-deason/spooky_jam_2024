@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 
+use crate::lift_component;
+
 #[derive(Component, Reflect)]
 #[reflect(Component)]
 pub struct Block;
@@ -40,6 +42,10 @@ pub struct Anchors(pub Vec<(Vec3, AnchorColor, Option<Entity>)>);
 #[reflect(Component)]
 pub struct MouseAnchor;
 
+#[derive(Component, Reflect, Clone)]
+#[reflect(Component)]
+pub struct DecayedRepresentation(pub String);
+
 pub struct BlockPlugin;
 
 impl Plugin for BlockPlugin {
@@ -47,6 +53,7 @@ impl Plugin for BlockPlugin {
         app
             .register_type::<Anchor>()
             .register_type::<AnchorColor>()
+            .register_type::<DecayedRepresentation>()
             .register_type::<DisasterTarget>()
             .register_type::<MouseAnchor>()
             .register_type::<Pickable>()
@@ -54,7 +61,7 @@ impl Plugin for BlockPlugin {
             .register_type::<PickSelection>()
             .register_type::<PickHighlight>()
             .register_type::<Block>()
-            .add_systems(Update, configure_anchors);
+            .add_systems(Update, (configure_anchors, lift_component::<DecayedRepresentation>));
     }
 }
 
@@ -63,8 +70,7 @@ fn configure_anchors(mut commands: Commands, anchors: Query<(Entity, &Transform,
         commands.entity(base_entity).remove::<Anchor>();
         let parent_entity = parent_query.iter_ancestors(base_entity).last().unwrap();
         if let Ok((maybe_anchors, parent_transform)) = composite_anchors.get_mut(parent_entity) {
-            //let offset = base_transform.translation() - parent_transform.translation();
-            let mut translation = base_transform.translation * parent_transform.scale;
+            let translation = base_transform.translation * parent_transform.scale;
 
             if let Some(mut anchors) = maybe_anchors {
                 anchors.0.push((translation, anchor.0, None));

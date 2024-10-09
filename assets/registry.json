@@ -14628,6 +14628,22 @@
       "type": "object",
       "typeInfo": "Struct"
     },
+    "spooky_jam::block::DecayedRepresentation": {
+      "isComponent": true,
+      "isResource": false,
+      "items": false,
+      "long_name": "spooky_jam::block::DecayedRepresentation",
+      "prefixItems": [
+        {
+          "type": {
+            "$ref": "#/$defs/alloc::string::String"
+          }
+        }
+      ],
+      "short_name": "DecayedRepresentation",
+      "type": "array",
+      "typeInfo": "TupleStruct"
+    },
     "spooky_jam::block::DisasterTarget": {
       "isComponent": true,
       "isResource": false,

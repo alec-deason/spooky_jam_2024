@@ -1,11 +1,12 @@
 use bevy::prelude::*;
 use blenvy::{
-    BlueprintAnimationPlayerLink, BlueprintAnimations, BlueprintInfo, GameWorldTag,
+    BlueprintInfo, GameWorldTag,
     HideUntilReady, SpawnBlueprint,
 };
 use bevy_mod_picking::prelude::*;
 
-use crate::{SNAP_DISTANCE, SavedPosition, MousePos, Spawner, Spawned, SpawnedFrom, DISASTERS, block::DisasterTarget};
+use crate::{SNAP_DISTANCE, SavedPosition, MousePos, Spawner, Spawned, SpawnedFrom, DISASTERS, block::{DisasterTarget, DecayedRepresentation}, lift_component, Lift};
+
 
 #[derive(Component, Reflect)]
 #[reflect(Component)]
@@ -20,9 +21,6 @@ pub enum Disaster {
 
 #[derive(Copy, Clone, Component)]
 struct Targeting;
-
-#[derive(Copy, Clone, Component)]
-struct LiftDisaster;
 
 #[derive(Copy, Clone, Component)]
 struct Activate;
@@ -50,9 +48,10 @@ impl Plugin for DecayPhasePlugin {
         app
             .register_type::<Disaster>()
             .register_type::<DisasterSpawner>()
+            .register_type::<DecayedRepresentation>()
             .insert_state(PhasePhase::Running)
             .add_systems(OnEnter(crate::GameState::DecayPhase), |mut next_state: ResMut<NextState<PhasePhase>>| { next_state.set(PhasePhase::Running) })
-            .add_systems(Update, (activate_disaster, lift_disaster, spawn_disaster).run_if(in_state(PhasePhase::Running)).run_if(in_state(crate::GameState::DecayPhase)))
+            .add_systems(Update, (lift_component::<Disaster>, activate_disaster, spawn_disaster).run_if(in_state(PhasePhase::Running)).run_if(in_state(crate::GameState::DecayPhase)))
             ;
     }
 }
@@ -75,7 +74,7 @@ fn spawn_disaster(
             GameWorldTag,
             SpawnedFrom(spawner_entity),
             PickableBundle::default(),
-            LiftDisaster,
+            Lift::<Disaster>::default(),
             On::<Pointer<DragStart>>::run(|event: Res<ListenerInput<Pointer<DragStart>>>, mut commands: Commands, transform: Query<&Transform>| {
                 let transform = transform.get(event.listener()).unwrap();
                 commands.entity(event.listener()).insert(SavedPosition(transform.clone())).insert(Targeting).insert(Pickable::IGNORE);
@@ -140,28 +139,25 @@ fn targeting(
     }
 }
 
-fn lift_disaster(
-    mut commands: Commands,
-    query: Query<(Entity, &Disaster), Without<BlueprintInfo>>,
-    main_blueprint: Query<Entity, With<BlueprintInfo>>,
-    parents: Query<&Parent>,
-) {
-    for (src_entity, disaster) in &query {
-        commands.entity(src_entity).remove::<Disaster>();
-        for ancestor in parents.iter_ancestors(src_entity) {
-            if main_blueprint.contains(ancestor) {
-                commands.entity(ancestor).insert(disaster.clone());
-            }
-        }
-    }
-}
-
 fn activate_disaster(
     mut commands: Commands,
-    query: Query<(Entity, &Targeted, &Disaster, &SpawnedFrom), With<Activate>>
+    query: Query<(Entity, &Targeted, &Disaster, &SpawnedFrom), With<Activate>>,
+    blocks: Query<(&Transform, &DecayedRepresentation)>,
+    parents: Query<&Parent>,
 ) {
     for (entity, targeted, disaster, spawned_from) in &query {
-        println!("POP");
+        for ancestor in parents.iter_ancestors(targeted.0) {
+            if let Ok((transform, decayed)) = blocks.get(ancestor) {
+                commands.spawn((
+                    BlueprintInfo::from_path(&format!("levels/{}", decayed.0)),
+                    transform.clone(),
+                    SpawnBlueprint,
+                    HideUntilReady,
+                    GameWorldTag,
+                ));
+                commands.entity(ancestor).despawn_recursive();
+            }
+        }
         commands.entity(entity).despawn_recursive();
         commands.entity(spawned_from.0).remove::<Spawned>();
     }
