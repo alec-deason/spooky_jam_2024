@@ -5,12 +5,15 @@ use blenvy::{
 };
 use bevy_mod_picking::prelude::*;
 
-use crate::{SNAP_DISTANCE, SavedPosition, MousePos, Spawner, Spawned, SpawnedFrom, DISASTERS, block::{DisasterTarget, DecayedRepresentation}, lift_component, Lift};
+use crate::{SNAP_DISTANCE, GameState, SavedPosition, MousePos, Spawner, Spawned, SpawnedFrom, DISASTERS, block::{DisasterTarget, DecayedRepresentation, Block}, lift_component, Lift};
 
 
 #[derive(Component, Reflect)]
 #[reflect(Component)]
 pub struct DisasterSpawner;
+
+#[derive(Component)]
+struct Decayed;
 
 #[derive(Component, Reflect, Copy, Clone, Debug)]
 #[reflect(Component)]
@@ -39,7 +42,7 @@ impl Disaster {
 #[derive(States, Debug, Clone, PartialEq, Eq, Hash)]
 enum PhasePhase {
     Running,
-    ShuttingDown,
+    Idle,
 }
 pub struct DecayPhasePlugin;
 
@@ -51,7 +54,7 @@ impl Plugin for DecayPhasePlugin {
             .register_type::<DecayedRepresentation>()
             .insert_state(PhasePhase::Running)
             .add_systems(OnEnter(crate::GameState::DecayPhase), |mut next_state: ResMut<NextState<PhasePhase>>| { next_state.set(PhasePhase::Running) })
-            .add_systems(Update, (lift_component::<Disaster>, activate_disaster, spawn_disaster).run_if(in_state(PhasePhase::Running)).run_if(in_state(crate::GameState::DecayPhase)))
+            .add_systems(Update, (lift_component::<Disaster>, check_completion, activate_disaster, spawn_disaster).run_if(in_state(PhasePhase::Running).and_then(in_state(crate::GameState::DecayPhase))))
             ;
     }
 }
@@ -154,11 +157,25 @@ fn activate_disaster(
                     SpawnBlueprint,
                     HideUntilReady,
                     GameWorldTag,
+                    Block,
+                    Decayed,
                 ));
                 commands.entity(ancestor).despawn_recursive();
             }
         }
         commands.entity(entity).despawn_recursive();
         commands.entity(spawned_from.0).remove::<Spawned>();
+    }
+}
+
+fn check_completion(
+    query: Query<Entity, (With<Block>, Without<Decayed>)>,
+    mut next_state: ResMut<NextState<GameState>>,
+    mut next_local_state: ResMut<NextState<PhasePhase>>,
+) {
+    if query.is_empty() {
+        println!("DONE");
+        next_state.set(GameState::ScoringPhase);
+        next_local_state.set(PhasePhase::Idle);
     }
 }

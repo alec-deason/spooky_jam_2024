@@ -7,12 +7,13 @@ use blenvy::{
 };
 use bevy_mod_picking::prelude::*;
 
-use crate::{SNAP_DISTANCE, CAMERA_SCALE, SavedPosition, Spawned, SpawnedFrom, Spawner, environmental_decoration::{Water, Sky}, MousePos, BLOCKS, block::DecayedRepresentation, Lift};
+use crate::{SNAP_DISTANCE, CAMERA_SCALE, GameState, SavedPosition, Spawned, SpawnedFrom, Spawner, environmental_decoration::{Water, Sky}, MousePos, BLOCKS, block::{DecayedRepresentation, Block}, Lift};
 
 #[derive(States, Debug, Clone, PartialEq, Eq, Hash)]
 enum PhasePhase {
     Running,
     ShuttingDown,
+    Idle,
 }
 
 
@@ -148,6 +149,7 @@ fn spawn_block(
                 HideUntilReady,
                 GameWorldTag,
                 OnTentacle,
+                Block,
                 SpawnedFrom(spawner_entity),
                 Lift::<DecayedRepresentation>::default(),
                 PickableBundle::default(),
@@ -409,10 +411,12 @@ fn despawn_spare_blocks(mut commands: Commands, query: Query<Entity, With<OnTent
 }
 
 fn check_shutdown_completion(
-    mut next_state: ResMut<NextState<crate::GameState>>,
+    mut next_state: ResMut<NextState<GameState>>,
+    mut next_local_state: ResMut<NextState<PhasePhase>>,
     query: Query<Entity, (With<Tentacle>, With<Dead>, Or<(With<Extending>, With<Retracting>)>)>,
 ) {
     if query.is_empty() {
-        next_state.set(crate::GameState::DecayPhase)
+        next_state.set(GameState::DecayPhase);
+        next_local_state.set(PhasePhase::Idle);
     }
 }

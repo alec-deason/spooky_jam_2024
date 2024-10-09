@@ -70,6 +70,7 @@ fn main() {
         .add_plugins(DefaultPickingPlugins
             .build()
             .disable::<DebugPickingPlugin>())
+        .add_plugins(bevy_hanabi::HanabiPlugin)
         .insert_resource(DebugPickingMode::Normal)
         .add_plugins(crate::block::BlockPlugin)
         .add_plugins(crate::environmental_decoration::EnvironmentalDecorationPlugin)
