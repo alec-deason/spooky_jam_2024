@@ -174,7 +174,6 @@ fn check_completion(
     mut next_local_state: ResMut<NextState<PhasePhase>>,
 ) {
     if query.is_empty() {
-        println!("DONE");
         next_state.set(GameState::ScoringPhase);
         next_local_state.set(PhasePhase::Idle);
     }

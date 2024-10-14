@@ -1,7 +1,10 @@
+use serde_json::Value;
+
 use bevy::{
     prelude::*,
     log::{Level, LogPlugin},
     window::PrimaryWindow,
+    gltf::GltfExtras,
 };
 use blenvy::*;
 use bevy_mod_picking::prelude::*;
@@ -25,6 +28,8 @@ enum GameState {
 }
 
 
+#[derive(Component)]
+struct ExtrasProcessed;
 #[derive(Component, Reflect)]
 #[reflect(Component)]
 pub struct SpawnedFrom(Entity);
@@ -70,7 +75,7 @@ fn main() {
         .add_plugins(DefaultPickingPlugins
             .build()
             .disable::<DebugPickingPlugin>())
-        .add_plugins(bevy_hanabi::HanabiPlugin)
+        .add_plugins(bevy_particle_systems::ParticleSystemPlugin)
         .insert_resource(DebugPickingMode::Normal)
         .add_plugins(crate::block::BlockPlugin)
         .add_plugins(crate::environmental_decoration::EnvironmentalDecorationPlugin)
@@ -81,7 +86,7 @@ fn main() {
             color: Color::WHITE,
             brightness: 1000.,
         })
-        .add_systems(Update, update_mouse_pos)
+        .add_systems(Update, (update_mouse_pos, check_for_gltf_extras))
         .run();
 }
 
@@ -107,6 +112,40 @@ pub fn lift_component<T: Component + Clone>(
         for ancestor in parents.iter_ancestors(src_entity) {
             if main_blueprint.contains(ancestor) {
                 commands.entity(ancestor).insert(component.clone());
+            }
+        }
+    }
+}
+
+fn check_for_gltf_extras(
+    mut commands: Commands,
+    gltf_extras_per_entity: Query<(
+        Entity,
+        &GltfExtras,
+    ), Without<ExtrasProcessed>>,
+    children: Query<&Children>,
+    parents: Query<&Parent>,
+    ready: Query<Entity, With<BlueprintInstanceReady>>,
+    mut material_handle: Query<&mut Handle<StandardMaterial>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    for (entity, extras) in gltf_extras_per_entity.iter() {
+        let v: Value = serde_json::from_str(&extras.value).unwrap();
+        if let Some(color) = v.get("color") {
+            if ready.contains(entity) || parents.iter_ancestors(entity).any(|e| ready.contains(e)) {
+                let r = color.get(0).unwrap().as_f64().unwrap() as f32;
+                let g = color.get(1).unwrap().as_f64().unwrap() as f32;
+                let b = color.get(2).unwrap().as_f64().unwrap() as f32;
+                for child_entity in children.iter_descendants(entity) {
+                    if let Ok(mut handle) = material_handle.get_mut(child_entity) {
+                        if let Some(material) = materials.get_mut(&*handle) {
+                            let mut new_material = material.clone();
+                            new_material.emissive = LinearRgba::rgb(r,g,b);
+                            *handle = materials.add(new_material);
+                            commands.entity(entity).insert(ExtrasProcessed);
+                        }
+                    }
+                }
             }
         }
     }

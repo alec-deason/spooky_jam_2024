@@ -32,7 +32,7 @@ impl Sky {
         let color = self.current_color(now);
         *self = Sky::Transition {
             start_color: color,
-            end_color: Color::srgba(0.002, 0.001, 0.012, 1.0),
+            end_color: Color::srgba(0.102, 0.101, 0.112, 1.0),
             start_time: now,
             end_time: now + std::time::Duration::from_secs(2),
             start_star_brightness: self.current_star_brightness(now),
@@ -138,6 +138,8 @@ fn star_animation(
             };
             let c = sky_state.current_color(now).mix(&Color::WHITE, b);
             material.emissive = c.into();
+            material.base_color = Color::srgba(0.0,0.0,0.0,sky_state.current_star_brightness(now));
+            material.alpha_mode = AlphaMode::Blend;
         }
     }
 }

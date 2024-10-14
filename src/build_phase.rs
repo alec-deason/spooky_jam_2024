@@ -7,7 +7,7 @@ use blenvy::{
 };
 use bevy_mod_picking::prelude::*;
 
-use crate::{SNAP_DISTANCE, CAMERA_SCALE, GameState, SavedPosition, Spawned, SpawnedFrom, Spawner, environmental_decoration::{Water, Sky}, MousePos, BLOCKS, block::{DecayedRepresentation, Block}, Lift};
+use crate::{SNAP_DISTANCE, CAMERA_SCALE, GameState, SavedPosition, Spawned, SpawnedFrom, Spawner, environmental_decoration::{Water, Sky}, MousePos, BLOCKS, block::{DecayedRepresentation, Block, AnchorState}, Lift};
 
 #[derive(States, Debug, Clone, PartialEq, Eq, Hash)]
 enum PhasePhase {
@@ -29,6 +29,7 @@ pub struct Snapped {
     a_anchor: usize,
     b_entity: Entity,
     b_anchor: usize,
+    a_translation: Vec3,
 }
 
 #[derive(Component, Reflect)]
@@ -83,7 +84,6 @@ impl Plugin for BuildPhasePlugin {
                 start_drag,
                 stop_drag,
                 update_tentacle_spawners,
-                clear_blocked_anchors,
             ).run_if(in_state(crate::GameState::BuildPhase)).run_if(in_state(PhasePhase::Running)))
             .add_systems(PostUpdate, (check_completion.run_if(in_state(PhasePhase::Running)), blocks_track_spawners).run_if(in_state(crate::GameState::BuildPhase)))
             .add_systems(OnEnter(crate::GameState::BuildPhase), setup)
@@ -170,18 +170,19 @@ fn stop_drag(
 ) {
     for (entity, spawned_from, mut transform, maybe_snapped, maybe_saved) in &mut query {
         commands.entity(entity).remove::<Snapped>().remove::<SavedPosition>();
-        if let Some(Snapped { a_entity, a_anchor, b_entity, b_anchor }) = maybe_snapped.map(|v| v.into_inner()) {
+        if let Some(Snapped { a_entity, a_anchor, b_entity, b_anchor, a_translation }) = maybe_snapped.map(|v| v.into_inner()) {
             if let Ok(mut anchors) = anchors.get_mut(*a_entity) {
-                anchors.0[*a_anchor].2 = Some(*b_entity);
+                anchors.0[*a_anchor].2 = AnchorState::Occupied(*b_entity);
             }
             if let Ok(mut anchors) = anchors.get_mut(*b_entity) {
-                anchors.0[*b_anchor].2 = Some(*a_entity);
+                anchors.0[*b_anchor].2 = AnchorState::Occupied(*a_entity);
             }
             commands.entity(spawned_from.0).remove::<Spawned>();
             commands.entity(entity).remove::<OnTentacle>().insert(Pickable::IGNORE).insert(NeedsClearance);
             for descendant in children_query.iter_descendants(entity) {
                 commands.entity(descendant).insert(Pickable::IGNORE);
             }
+            transform.translation = *a_translation;
         } else {
             for water_transform in &water {
                 if transform.translation.y < water_transform.translation().y {
@@ -207,35 +208,46 @@ fn start_drag(mut commands: Commands, mut query: Query<(Entity, &mut Transform),
     }
 }
 
-fn follow_mouse(mut commands: Commands, mut query: Query<(Entity, &mut Transform, &crate::block::Anchors), With<AwaitingPlacement>>, mouse_pos: Res<MousePos>, others: Query<(Entity, &Transform, &crate::block::Anchors), (Without<AwaitingPlacement>, Without<OnTentacle>)>) {
-    for (entity, mut transform, anchors) in &mut query {
+fn follow_mouse(
+    mut commands: Commands,
+    mut query: Query<(Entity, &mut Transform, &crate::block::Anchors, Option<&crate::block::InCollision>), With<AwaitingPlacement>>,
+    mouse_pos: Res<MousePos>,
+    others: Query<(Entity, &Transform, &crate::block::Anchors), (Without<AwaitingPlacement>, Without<OnTentacle>)>)
+        {
+    for (entity, mut transform, anchors, in_collision) in &mut query {
         let mut snapped = None;
-
+        let mut snap_dirty = false;
         transform.rotation = Quat::IDENTITY;
         let mut maybe_pos = transform.translation.clone();
         maybe_pos.x = mouse_pos.0.x;
         maybe_pos.y = mouse_pos.0.y;
 
-        'outer: for (other_entity, other_transform, other_anchors) in &others {
-            for (a_anchor, (anchor, color, bound_entity)) in anchors.0.iter().enumerate() {
-                if bound_entity.is_some() {
-                    continue
-                }
-                for (b_anchor, (other_anchor, other_color, other_bound_entity)) in other_anchors.0.iter().enumerate() {
-                    if other_bound_entity.is_some() || !color.compatible(*other_color) {
+        if in_collision.is_none() {
+            'outer: for (other_entity, other_transform, other_anchors) in &others {
+                for (a_anchor, (anchor, color, anchor_state)) in anchors.0.iter().enumerate() {
+                    if !(matches!(anchor_state, AnchorState::Clear) || matches!(anchor_state, AnchorState::Blocked(e) if *e == other_entity)) {
+                        snap_dirty = true;
                         continue
                     }
-                    let d = (maybe_pos + *anchor)-(other_transform.translation + *other_anchor);
-                    if d.length() < SNAP_DISTANCE*CAMERA_SCALE {
-                        maybe_pos.x -= d.x;
-                        maybe_pos.y -= d.y;
-                        snapped = Some(Snapped {
-                            a_entity: entity,
-                            a_anchor,
-                            b_entity: other_entity,
-                            b_anchor,
-                        });
-                        break 'outer;
+                    for (b_anchor, (other_anchor, other_color, other_anchor_state)) in other_anchors.0.iter().enumerate() {
+                        if !(matches!(other_anchor_state, AnchorState::Clear) || matches!(other_anchor_state, AnchorState::Blocked(e) if *e == entity)) || !color.compatible(*other_color) {
+                            snap_dirty = true;
+                            continue
+                        }
+                        let d = (maybe_pos + *anchor)-(other_transform.translation + *other_anchor);
+                        if d.length() < SNAP_DISTANCE*CAMERA_SCALE {
+                            maybe_pos.x -= d.x;
+                            maybe_pos.y -= d.y;
+                            snapped = Some(Snapped {
+                                a_entity: entity,
+                                a_anchor,
+                                b_entity: other_entity,
+                                b_anchor,
+                                a_translation: maybe_pos,
+                            });
+                            snap_dirty = true;
+                            break 'outer;
+                        }
                     }
                 }
             }
@@ -244,10 +256,12 @@ fn follow_mouse(mut commands: Commands, mut query: Query<(Entity, &mut Transform
         transform.translation.x = maybe_pos.x;
         transform.translation.y = maybe_pos.y;
 
-        if let Some(snapped) = snapped {
-            commands.entity(entity).insert(snapped);
-        } else {
-            commands.entity(entity).remove::<Snapped>();
+        if snap_dirty {
+            if let Some(snapped) = snapped {
+                commands.entity(entity).insert(snapped);
+            } else {
+                commands.entity(entity).remove::<Snapped>();
+            }
         }
     }
 }
@@ -338,57 +352,43 @@ fn update_tentacle_spawners(mut commands: Commands, query: Query<Entity, (With<T
     }
 }
 
-fn clear_blocked_anchors(mut commands: Commands, mut newly_placed: Query<(Entity, &GlobalTransform, &mut crate::block::Anchors), With<NeedsClearance>>, mut others: Query<(&GlobalTransform, &mut crate::block::Anchors), Without<NeedsClearance>>) {
-    for (entity, transform, mut anchors) in &mut newly_placed {
-        commands.entity(entity).remove::<NeedsClearance>();
-        for (other_transform, mut other_anchors) in &mut others {
-            anchors.0.retain(|(anchor, _color, bound_entity)| {
-                if bound_entity.is_some() {
-                    return true;
-                }
-                let mut retain = true;
-                other_anchors.0.retain(|(other_anchor, _other_color, other_bound_entity)| {
-                    if other_bound_entity.is_some() {
-                        return true;
-                    }
-                    let d = (transform.translation() + *anchor)-(other_transform.translation() + *other_anchor);
-                    if d.length() < SNAP_DISTANCE*CAMERA_SCALE {
-                        retain = false;
-                        false
-                    } else {
-                        true
-                    }
-                });
-                retain
-            });
-        }
-    }
-}
-
 fn check_completion(
+    in_drag: Query<Entity, With<AwaitingPlacement>>,
     query: Query<&crate::block::Anchors, Without<OnTentacle>>,
     mut sky: Query<&mut Sky>,
     time: Res<Time>,
     mut next_state: ResMut<NextState<PhasePhase>>,
+    mut delay: Local<bevy::time::Stopwatch>,
 ) {
+    delay.tick(time.delta());
+    if !in_drag.is_empty() {
+        return
+    }
+
     let mut done = None;
     'outer: for anchors in &query {
-        if done.is_none() {
-            done = Some(true);
-        }
-        for (_, color, bound_to) in &anchors.0 {
-            if *color == crate::block::AnchorColor::Up && bound_to.is_none() {
-                done = Some(false);
-                break 'outer;
+        for (_, color, anchor_state) in &anchors.0 {
+            if *color == crate::block::AnchorColor::Up {
+                if done.is_none() {
+                    done = Some(true);
+                }
+                if *anchor_state == AnchorState::Clear {
+                    done = Some(false);
+                    break 'outer;
+                }
             }
         }
     }
 
     if done.unwrap_or(false) {
-        for mut sky in &mut sky {
-            sky.to_night(time.elapsed());
+        if delay.elapsed() > std::time::Duration::from_millis(500) {
+            for mut sky in &mut sky {
+                sky.to_night(time.elapsed());
+            }
+            next_state.set(PhasePhase::ShuttingDown);
         }
-        next_state.set(PhasePhase::ShuttingDown);
+    } else {
+        delay.reset();
     }
 }
 

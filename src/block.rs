@@ -1,4 +1,8 @@
-use bevy::prelude::*;
+use std::collections::HashMap;
+use bevy::{
+    prelude::*,
+    render::primitives::Aabb,
+};
 use bevy_mod_picking::prelude::*;
 
 use crate::lift_component;
@@ -17,6 +21,8 @@ pub enum DisasterTarget {
 pub enum AnchorColor {
     Up,
     Down,
+    DecorationUp,
+    DecorationDown,
     None,
 }
 
@@ -25,6 +31,8 @@ impl AnchorColor {
         match self {
             AnchorColor::Up => other == AnchorColor::Down,
             AnchorColor::Down => other == AnchorColor::Up,
+            AnchorColor::DecorationUp => other == AnchorColor::DecorationDown,
+            AnchorColor::DecorationDown => other == AnchorColor::DecorationUp,
             AnchorColor::None => false,
         }
     }
@@ -34,9 +42,16 @@ impl AnchorColor {
 #[reflect(Component)]
 pub struct Anchor(AnchorColor);
 
+#[derive(Copy, Clone, Debug, PartialEq, Reflect)]
+pub enum AnchorState {
+    Clear,
+    Occupied(Entity),
+    Blocked(Entity),
+}
+
 #[derive(Component, Reflect)]
 #[reflect(Component)]
-pub struct Anchors(pub Vec<(Vec3, AnchorColor, Option<Entity>)>);
+pub struct Anchors(pub Vec<(Vec3, AnchorColor, AnchorState)>);
 
 #[derive(Component, Reflect)]
 #[reflect(Component)]
@@ -45,6 +60,15 @@ pub struct MouseAnchor;
 #[derive(Component, Reflect, Clone)]
 #[reflect(Component)]
 pub struct DecayedRepresentation(pub String);
+
+#[derive(Component)]
+struct Collider(Box<dyn parry3d::shape::Shape>);
+
+#[derive(Component)]
+pub struct InCollision(Vec<Entity>);
+
+#[derive(Component)]
+struct ProcessedCollider;
 
 pub struct BlockPlugin;
 
@@ -61,7 +85,8 @@ impl Plugin for BlockPlugin {
             .register_type::<PickSelection>()
             .register_type::<PickHighlight>()
             .register_type::<Block>()
-            .add_systems(Update, (configure_anchors, lift_component::<DecayedRepresentation>));
+            .add_systems(Update, (add_colliders, test_colliders, configure_anchors, lift_component::<DecayedRepresentation>))
+            .add_systems(PostUpdate, check_anchor_clearance);
     }
 }
 
@@ -73,10 +98,81 @@ fn configure_anchors(mut commands: Commands, anchors: Query<(Entity, &Transform,
             let translation = base_transform.translation * parent_transform.scale;
 
             if let Some(mut anchors) = maybe_anchors {
-                anchors.0.push((translation, anchor.0, None));
+                anchors.0.push((translation, anchor.0, AnchorState::Clear));
             } else {
-                commands.entity(parent_entity).insert(Anchors(vec![(translation, anchor.0, None)]));
+                commands.entity(parent_entity).insert(Anchors(vec![(translation, anchor.0, AnchorState::Clear)]));
                 return;
+            }
+        }
+    }
+}
+
+fn add_colliders(
+    mut commands: Commands,
+    query: Query<(Entity, &Aabb), (With<crate::block::Block>, Without<ProcessedCollider>)>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    for (entity, aabb) in &query {
+        commands.entity(entity).insert(ProcessedCollider).insert(Collider(Box::new(parry3d::shape::Cuboid { half_extents: [aabb.half_extents.x, aabb.half_extents.y, aabb.half_extents.z].into() })));
+    }
+}
+
+fn test_colliders(
+    mut commands: Commands,
+    query: Query<(Entity, &GlobalTransform, &Collider)>,
+) {
+    let mut collisions:HashMap<Entity, Vec<Entity>> = HashMap::new();
+    for [(entity_a, transform_a, collider_a), (entity_b, transform_b, collider_b)] in query.iter_combinations() {
+        collisions.entry(entity_a).or_default();
+        collisions.entry(entity_b).or_default();
+        let t_a = transform_a.translation();
+        let t_b = transform_b.translation();
+        if parry3d::query::contact(
+            &[t_a.x, t_a.y, t_a.z].into(),
+            collider_a.0.as_ref(),
+            &[t_b.x, t_b.y, t_b.z].into(),
+            collider_b.0.as_ref(),
+            -4.0,
+        ).unwrap().is_some() {
+            collisions.entry(entity_a).or_default().push(entity_b);
+            collisions.entry(entity_b).or_default().push(entity_a);
+        }
+    }
+    for (entity, collisions) in collisions {
+        if collisions.is_empty() {
+            commands.entity(entity).remove::<InCollision>();
+        } else {
+            commands.entity(entity).insert(InCollision(collisions));
+        }
+    }
+}
+
+fn check_anchor_clearance(
+    mut anchors: Query<(Entity, &GlobalTransform, &mut Anchors)>,
+    blocks: Query<(Entity, &GlobalTransform, &Collider)>,
+) {
+    for (anchor_entity, base_transform, mut anchors) in &mut anchors {
+        for (anchor_transform, anchor_color, ref mut anchor_state) in anchors.0.iter_mut() {
+            if *anchor_color == AnchorColor::Up && matches!(anchor_state, AnchorState::Clear | AnchorState::Blocked(_)) {
+                *anchor_state = AnchorState::Clear;
+                let t_a = base_transform.translation() + *anchor_transform;
+                let anchor_collider = parry3d::shape::Cuboid { half_extents: [1.0, 1.0, 1.0].into() };
+                for (block_entity, block_transform, block_collider) in &blocks {
+                    if anchor_entity == block_entity {
+                        continue
+                    }
+                    let t_b = block_transform.translation();
+                    if parry3d::query::contact(
+                        &[t_a.x, t_a.y, t_a.z].into(),
+                        &anchor_collider,
+                        &[t_b.x, t_b.y, t_b.z].into(),
+                        block_collider.0.as_ref(),
+                        -4.0,
+                    ).unwrap().is_some() {
+                        *anchor_state = AnchorState::Blocked(block_entity);
+                    }
+                }
             }
         }
     }

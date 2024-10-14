@@ -31,27 +31,6 @@
       "type": "array",
       "typeInfo": "Tuple"
     },
-    "(f32, f32)": {
-      "isComponent": false,
-      "isResource": false,
-      "items": false,
-      "long_name": "(f32, f32)",
-      "prefixItems": [
-        {
-          "type": {
-            "$ref": "#/$defs/f32"
-          }
-        },
-        {
-          "type": {
-            "$ref": "#/$defs/f32"
-          }
-        }
-      ],
-      "short_name": "(f32, f32)",
-      "type": "array",
-      "typeInfo": "Tuple"
-    },
     "(u8, u8)": {
       "isComponent": false,
       "isResource": false,
@@ -72,32 +51,6 @@
       "short_name": "(u8, u8)",
       "type": "array",
       "typeInfo": "Tuple"
-    },
-    "[f32; 16]": {
-      "isComponent": false,
-      "isResource": false,
-      "items": {
-        "type": {
-          "$ref": "#/$defs/f32"
-        }
-      },
-      "long_name": "[f32; 16]",
-      "short_name": "[f32; 16]",
-      "type": "array",
-      "typeInfo": "Array"
-    },
-    "[u32; 4]": {
-      "isComponent": false,
-      "isResource": false,
-      "items": {
-        "type": {
-          "$ref": "#/$defs/u32"
-        }
-      },
-      "long_name": "[u32; 4]",
-      "short_name": "[u32; 4]",
-      "type": "array",
-      "typeInfo": "Array"
     },
     "alloc::borrow::Cow<str>": {
       "isComponent": false,
@@ -180,45 +133,6 @@
       "type": "array",
       "typeInfo": "List"
     },
-    "alloc::vec::Vec<bevy_hanabi::graph::expr::Expr>": {
-      "isComponent": false,
-      "isResource": false,
-      "items": {
-        "type": {
-          "$ref": "#/$defs/bevy_hanabi::graph::expr::Expr"
-        }
-      },
-      "long_name": "alloc::vec::Vec<bevy_hanabi::graph::expr::Expr>",
-      "short_name": "Vec<Expr>",
-      "type": "array",
-      "typeInfo": "List"
-    },
-    "alloc::vec::Vec<bevy_hanabi::properties::Property>": {
-      "isComponent": false,
-      "isResource": false,
-      "items": {
-        "type": {
-          "$ref": "#/$defs/bevy_hanabi::properties::Property"
-        }
-      },
-      "long_name": "alloc::vec::Vec<bevy_hanabi::properties::Property>",
-      "short_name": "Vec<Property>",
-      "type": "array",
-      "typeInfo": "List"
-    },
-    "alloc::vec::Vec<bevy_hanabi::properties::PropertyInstance>": {
-      "isComponent": false,
-      "isResource": false,
-      "items": {
-        "type": {
-          "$ref": "#/$defs/bevy_hanabi::properties::PropertyInstance"
-        }
-      },
-      "long_name": "alloc::vec::Vec<bevy_hanabi::properties::PropertyInstance>",
-      "short_name": "Vec<PropertyInstance>",
-      "type": "array",
-      "typeInfo": "List"
-    },
     "alloc::vec::Vec<bevy_math::rects::urect::URect>": {
       "isComponent": false,
       "isResource": false,
@@ -229,6 +143,71 @@
       },
       "long_name": "alloc::vec::Vec<bevy_math::rects::urect::URect>",
       "short_name": "Vec<URect>",
+      "type": "array",
+      "typeInfo": "List"
+    },
+    "alloc::vec::Vec<bevy_particle_systems::components::ParticleBurst>": {
+      "isComponent": false,
+      "isResource": false,
+      "items": {
+        "type": {
+          "$ref": "#/$defs/bevy_particle_systems::components::ParticleBurst"
+        }
+      },
+      "long_name": "alloc::vec::Vec<bevy_particle_systems::components::ParticleBurst>",
+      "short_name": "Vec<ParticleBurst>",
+      "type": "array",
+      "typeInfo": "List"
+    },
+    "alloc::vec::Vec<bevy_particle_systems::values::CurvePoint<bevy_color::color::Color>>": {
+      "isComponent": false,
+      "isResource": false,
+      "items": {
+        "type": {
+          "$ref": "#/$defs/bevy_particle_systems::values::CurvePoint<bevy_color::color::Color>"
+        }
+      },
+      "long_name": "alloc::vec::Vec<bevy_particle_systems::values::CurvePoint<bevy_color::color::Color>>",
+      "short_name": "Vec<CurvePoint<Color>>",
+      "type": "array",
+      "typeInfo": "List"
+    },
+    "alloc::vec::Vec<bevy_particle_systems::values::CurvePoint<f32>>": {
+      "isComponent": false,
+      "isResource": false,
+      "items": {
+        "type": {
+          "$ref": "#/$defs/bevy_particle_systems::values::CurvePoint<f32>"
+        }
+      },
+      "long_name": "alloc::vec::Vec<bevy_particle_systems::values::CurvePoint<f32>>",
+      "short_name": "Vec<CurvePoint<f32>>",
+      "type": "array",
+      "typeInfo": "List"
+    },
+    "alloc::vec::Vec<bevy_particle_systems::values::CurvePoint<glam::Vec3>>": {
+      "isComponent": false,
+      "isResource": false,
+      "items": {
+        "type": {
+          "$ref": "#/$defs/bevy_particle_systems::values::CurvePoint<glam::Vec3>"
+        }
+      },
+      "long_name": "alloc::vec::Vec<bevy_particle_systems::values::CurvePoint<glam::Vec3>>",
+      "short_name": "Vec<CurvePoint<Vec3>>",
+      "type": "array",
+      "typeInfo": "List"
+    },
+    "alloc::vec::Vec<bevy_particle_systems::values::VelocityModifier>": {
+      "isComponent": false,
+      "isResource": false,
+      "items": {
+        "type": {
+          "$ref": "#/$defs/bevy_particle_systems::values::VelocityModifier"
+        }
+      },
+      "long_name": "alloc::vec::Vec<bevy_particle_systems::values::VelocityModifier>",
+      "short_name": "Vec<VelocityModifier>",
       "type": "array",
       "typeInfo": "List"
     },
@@ -398,6 +377,19 @@
       },
       "long_name": "alloc::vec::Vec<u32>",
       "short_name": "Vec<u32>",
+      "type": "array",
+      "typeInfo": "List"
+    },
+    "alloc::vec::Vec<usize>": {
+      "isComponent": false,
+      "isResource": false,
+      "items": {
+        "type": {
+          "$ref": "#/$defs/usize"
+        }
+      },
+      "long_name": "alloc::vec::Vec<usize>",
+      "short_name": "Vec<usize>",
       "type": "array",
       "typeInfo": "List"
     },
@@ -1160,44 +1152,6 @@
         }
       ],
       "short_name": "Handle<GltfPrimitive>",
-      "type": "object",
-      "typeInfo": "Enum"
-    },
-    "bevy_asset::handle::Handle<bevy_hanabi::asset::EffectAsset>": {
-      "isComponent": true,
-      "isResource": false,
-      "long_name": "bevy_asset::handle::Handle<bevy_hanabi::asset::EffectAsset>",
-      "oneOf": [
-        {
-          "items": false,
-          "long_name": "Strong",
-          "prefixItems": [
-            {
-              "type": {
-                "$ref": "#/$defs/std::sync::Arc<bevy_asset::handle::StrongHandle>"
-              }
-            }
-          ],
-          "short_name": "Strong",
-          "type": "array",
-          "typeInfo": "Tuple"
-        },
-        {
-          "items": false,
-          "long_name": "Weak",
-          "prefixItems": [
-            {
-              "type": {
-                "$ref": "#/$defs/bevy_asset::id::AssetId<bevy_hanabi::asset::EffectAsset>"
-              }
-            }
-          ],
-          "short_name": "Weak",
-          "type": "array",
-          "typeInfo": "Tuple"
-        }
-      ],
-      "short_name": "Handle<EffectAsset>",
       "type": "object",
       "typeInfo": "Enum"
     },
@@ -2168,52 +2122,6 @@
         }
       ],
       "short_name": "AssetId<GltfPrimitive>",
-      "type": "object",
-      "typeInfo": "Enum"
-    },
-    "bevy_asset::id::AssetId<bevy_hanabi::asset::EffectAsset>": {
-      "isComponent": false,
-      "isResource": false,
-      "long_name": "bevy_asset::id::AssetId<bevy_hanabi::asset::EffectAsset>",
-      "oneOf": [
-        {
-          "additionalProperties": false,
-          "long_name": "Index",
-          "properties": {
-            "index": {
-              "long_name": "index",
-              "type": {
-                "$ref": "#/$defs/bevy_asset::assets::AssetIndex"
-              }
-            }
-          },
-          "required": [
-            "index"
-          ],
-          "short_name": "Index",
-          "type": "object",
-          "typeInfo": "Struct"
-        },
-        {
-          "additionalProperties": false,
-          "long_name": "Uuid",
-          "properties": {
-            "uuid": {
-              "long_name": "uuid",
-              "type": {
-                "$ref": "#/$defs/uuid::Uuid"
-              }
-            }
-          },
-          "required": [
-            "uuid"
-          ],
-          "short_name": "Uuid",
-          "type": "object",
-          "typeInfo": "Struct"
-        }
-      ],
-      "short_name": "AssetId<EffectAsset>",
       "type": "object",
       "typeInfo": "Enum"
     },
@@ -4097,1125 +4005,6 @@
         "value"
       ],
       "short_name": "GltfSceneExtras",
-      "type": "object",
-      "typeInfo": "Struct"
-    },
-    "bevy_hanabi::ParticleEffect": {
-      "additionalProperties": false,
-      "isComponent": true,
-      "isResource": false,
-      "long_name": "bevy_hanabi::ParticleEffect",
-      "properties": {
-        "handle": {
-          "type": {
-            "$ref": "#/$defs/bevy_asset::handle::Handle<bevy_hanabi::asset::EffectAsset>"
-          }
-        },
-        "z_layer_2d": {
-          "type": {
-            "$ref": "#/$defs/core::option::Option<f32>"
-          }
-        }
-      },
-      "required": [
-        "handle"
-      ],
-      "short_name": "ParticleEffect",
-      "type": "object",
-      "typeInfo": "Struct"
-    },
-    "bevy_hanabi::SimulationSpace": {
-      "isComponent": false,
-      "isResource": false,
-      "long_name": "bevy_hanabi::SimulationSpace",
-      "oneOf": [
-        "Global",
-        "Local"
-      ],
-      "short_name": "SimulationSpace",
-      "type": "string",
-      "typeInfo": "Enum"
-    },
-    "bevy_hanabi::asset::AlphaMode": {
-      "isComponent": false,
-      "isResource": false,
-      "long_name": "bevy_hanabi::asset::AlphaMode",
-      "oneOf": [
-        {
-          "long_name": "Blend"
-        },
-        {
-          "long_name": "Premultiply"
-        },
-        {
-          "long_name": "Add"
-        },
-        {
-          "long_name": "Multiply"
-        },
-        {
-          "items": false,
-          "long_name": "Mask",
-          "prefixItems": [
-            {
-              "type": {
-                "$ref": "#/$defs/bevy_hanabi::graph::expr::ExprHandle"
-              }
-            }
-          ],
-          "short_name": "Mask",
-          "type": "array",
-          "typeInfo": "Tuple"
-        }
-      ],
-      "short_name": "AlphaMode",
-      "type": "object",
-      "typeInfo": "Enum"
-    },
-    "bevy_hanabi::asset::EffectAsset": {
-      "additionalProperties": false,
-      "isComponent": false,
-      "isResource": false,
-      "long_name": "bevy_hanabi::asset::EffectAsset",
-      "properties": {
-        "alpha_mode": {
-          "type": {
-            "$ref": "#/$defs/bevy_hanabi::asset::AlphaMode"
-          }
-        },
-        "capacities": {
-          "type": {
-            "$ref": "#/$defs/alloc::vec::Vec<u32>"
-          }
-        },
-        "module": {
-          "type": {
-            "$ref": "#/$defs/bevy_hanabi::graph::expr::Module"
-          }
-        },
-        "motion_integration": {
-          "type": {
-            "$ref": "#/$defs/bevy_hanabi::asset::MotionIntegration"
-          }
-        },
-        "name": {
-          "type": {
-            "$ref": "#/$defs/alloc::string::String"
-          }
-        },
-        "simulation_condition": {
-          "type": {
-            "$ref": "#/$defs/bevy_hanabi::asset::SimulationCondition"
-          }
-        },
-        "simulation_space": {
-          "type": {
-            "$ref": "#/$defs/bevy_hanabi::SimulationSpace"
-          }
-        },
-        "spawner": {
-          "type": {
-            "$ref": "#/$defs/bevy_hanabi::spawn::Spawner"
-          }
-        },
-        "z_layer_2d": {
-          "type": {
-            "$ref": "#/$defs/f32"
-          }
-        }
-      },
-      "required": [
-        "name",
-        "capacities",
-        "spawner",
-        "z_layer_2d",
-        "simulation_space",
-        "simulation_condition",
-        "motion_integration",
-        "module",
-        "alpha_mode"
-      ],
-      "short_name": "EffectAsset",
-      "type": "object",
-      "typeInfo": "Struct"
-    },
-    "bevy_hanabi::asset::MotionIntegration": {
-      "isComponent": false,
-      "isResource": false,
-      "long_name": "bevy_hanabi::asset::MotionIntegration",
-      "oneOf": [
-        "None",
-        "PreUpdate",
-        "PostUpdate"
-      ],
-      "short_name": "MotionIntegration",
-      "type": "string",
-      "typeInfo": "Enum"
-    },
-    "bevy_hanabi::asset::SimulationCondition": {
-      "isComponent": false,
-      "isResource": false,
-      "long_name": "bevy_hanabi::asset::SimulationCondition",
-      "oneOf": [
-        "WhenVisible",
-        "Always"
-      ],
-      "short_name": "SimulationCondition",
-      "type": "string",
-      "typeInfo": "Enum"
-    },
-    "bevy_hanabi::attribute::Attribute": {
-      "additionalProperties": false,
-      "isComponent": false,
-      "isResource": false,
-      "long_name": "bevy_hanabi::attribute::Attribute",
-      "properties": {
-        "default_value": {
-          "type": {
-            "$ref": "#/$defs/bevy_hanabi::graph::Value"
-          }
-        },
-        "name": {
-          "type": {
-            "$ref": "#/$defs/alloc::borrow::Cow<str>"
-          }
-        }
-      },
-      "required": [
-        "name",
-        "default_value"
-      ],
-      "short_name": "Attribute",
-      "type": "object",
-      "typeInfo": "Struct"
-    },
-    "bevy_hanabi::attributes::MatrixType": {
-      "additionalProperties": false,
-      "isComponent": false,
-      "isResource": false,
-      "long_name": "bevy_hanabi::attributes::MatrixType",
-      "properties": {
-        "cols": {
-          "type": {
-            "$ref": "#/$defs/u8"
-          }
-        },
-        "rows": {
-          "type": {
-            "$ref": "#/$defs/u8"
-          }
-        }
-      },
-      "required": [
-        "rows",
-        "cols"
-      ],
-      "short_name": "MatrixType",
-      "type": "object",
-      "typeInfo": "Struct"
-    },
-    "bevy_hanabi::attributes::ScalarType": {
-      "isComponent": false,
-      "isResource": false,
-      "long_name": "bevy_hanabi::attributes::ScalarType",
-      "oneOf": [
-        "Bool",
-        "Float",
-        "Int",
-        "Uint"
-      ],
-      "short_name": "ScalarType",
-      "type": "string",
-      "typeInfo": "Enum"
-    },
-    "bevy_hanabi::attributes::ValueType": {
-      "isComponent": false,
-      "isResource": false,
-      "long_name": "bevy_hanabi::attributes::ValueType",
-      "oneOf": [
-        {
-          "items": false,
-          "long_name": "Scalar",
-          "prefixItems": [
-            {
-              "type": {
-                "$ref": "#/$defs/bevy_hanabi::attributes::ScalarType"
-              }
-            }
-          ],
-          "short_name": "Scalar",
-          "type": "array",
-          "typeInfo": "Tuple"
-        },
-        {
-          "items": false,
-          "long_name": "Vector",
-          "prefixItems": [
-            {
-              "type": {
-                "$ref": "#/$defs/bevy_hanabi::attributes::VectorType"
-              }
-            }
-          ],
-          "short_name": "Vector",
-          "type": "array",
-          "typeInfo": "Tuple"
-        },
-        {
-          "items": false,
-          "long_name": "Matrix",
-          "prefixItems": [
-            {
-              "type": {
-                "$ref": "#/$defs/bevy_hanabi::attributes::MatrixType"
-              }
-            }
-          ],
-          "short_name": "Matrix",
-          "type": "array",
-          "typeInfo": "Tuple"
-        }
-      ],
-      "short_name": "ValueType",
-      "type": "object",
-      "typeInfo": "Enum"
-    },
-    "bevy_hanabi::attributes::VectorType": {
-      "additionalProperties": false,
-      "isComponent": false,
-      "isResource": false,
-      "long_name": "bevy_hanabi::attributes::VectorType",
-      "properties": {
-        "count": {
-          "type": {
-            "$ref": "#/$defs/u8"
-          }
-        },
-        "elem_type": {
-          "type": {
-            "$ref": "#/$defs/bevy_hanabi::attributes::ScalarType"
-          }
-        }
-      },
-      "required": [
-        "elem_type",
-        "count"
-      ],
-      "short_name": "VectorType",
-      "type": "object",
-      "typeInfo": "Struct"
-    },
-    "bevy_hanabi::graph::MatrixValue": {
-      "additionalProperties": false,
-      "isComponent": false,
-      "isResource": false,
-      "long_name": "bevy_hanabi::graph::MatrixValue",
-      "properties": {
-        "matrix_type": {
-          "type": {
-            "$ref": "#/$defs/bevy_hanabi::attributes::MatrixType"
-          }
-        },
-        "storage": {
-          "type": {
-            "$ref": "#/$defs/[f32; 16]"
-          }
-        }
-      },
-      "required": [
-        "matrix_type",
-        "storage"
-      ],
-      "short_name": "MatrixValue",
-      "type": "object",
-      "typeInfo": "Struct"
-    },
-    "bevy_hanabi::graph::ScalarValue": {
-      "isComponent": false,
-      "isResource": false,
-      "long_name": "bevy_hanabi::graph::ScalarValue",
-      "oneOf": [
-        {
-          "items": false,
-          "long_name": "Bool",
-          "prefixItems": [
-            {
-              "type": {
-                "$ref": "#/$defs/bool"
-              }
-            }
-          ],
-          "short_name": "Bool",
-          "type": "array",
-          "typeInfo": "Tuple"
-        },
-        {
-          "items": false,
-          "long_name": "Float",
-          "prefixItems": [
-            {
-              "type": {
-                "$ref": "#/$defs/f32"
-              }
-            }
-          ],
-          "short_name": "Float",
-          "type": "array",
-          "typeInfo": "Tuple"
-        },
-        {
-          "items": false,
-          "long_name": "Int",
-          "prefixItems": [
-            {
-              "type": {
-                "$ref": "#/$defs/i32"
-              }
-            }
-          ],
-          "short_name": "Int",
-          "type": "array",
-          "typeInfo": "Tuple"
-        },
-        {
-          "items": false,
-          "long_name": "Uint",
-          "prefixItems": [
-            {
-              "type": {
-                "$ref": "#/$defs/u32"
-              }
-            }
-          ],
-          "short_name": "Uint",
-          "type": "array",
-          "typeInfo": "Tuple"
-        }
-      ],
-      "short_name": "ScalarValue",
-      "type": "object",
-      "typeInfo": "Enum"
-    },
-    "bevy_hanabi::graph::Value": {
-      "isComponent": false,
-      "isResource": false,
-      "long_name": "bevy_hanabi::graph::Value",
-      "oneOf": [
-        {
-          "items": false,
-          "long_name": "Scalar",
-          "prefixItems": [
-            {
-              "type": {
-                "$ref": "#/$defs/bevy_hanabi::graph::ScalarValue"
-              }
-            }
-          ],
-          "short_name": "Scalar",
-          "type": "array",
-          "typeInfo": "Tuple"
-        },
-        {
-          "items": false,
-          "long_name": "Vector",
-          "prefixItems": [
-            {
-              "type": {
-                "$ref": "#/$defs/bevy_hanabi::graph::VectorValue"
-              }
-            }
-          ],
-          "short_name": "Vector",
-          "type": "array",
-          "typeInfo": "Tuple"
-        },
-        {
-          "items": false,
-          "long_name": "Matrix",
-          "prefixItems": [
-            {
-              "type": {
-                "$ref": "#/$defs/bevy_hanabi::graph::MatrixValue"
-              }
-            }
-          ],
-          "short_name": "Matrix",
-          "type": "array",
-          "typeInfo": "Tuple"
-        }
-      ],
-      "short_name": "Value",
-      "type": "object",
-      "typeInfo": "Enum"
-    },
-    "bevy_hanabi::graph::VectorValue": {
-      "additionalProperties": false,
-      "isComponent": false,
-      "isResource": false,
-      "long_name": "bevy_hanabi::graph::VectorValue",
-      "properties": {
-        "storage": {
-          "type": {
-            "$ref": "#/$defs/[u32; 4]"
-          }
-        },
-        "vector_type": {
-          "type": {
-            "$ref": "#/$defs/bevy_hanabi::attributes::VectorType"
-          }
-        }
-      },
-      "required": [
-        "vector_type",
-        "storage"
-      ],
-      "short_name": "VectorValue",
-      "type": "object",
-      "typeInfo": "Struct"
-    },
-    "bevy_hanabi::graph::expr::AttributeExpr": {
-      "additionalProperties": false,
-      "isComponent": false,
-      "isResource": false,
-      "long_name": "bevy_hanabi::graph::expr::AttributeExpr",
-      "properties": {
-        "attr": {
-          "type": {
-            "$ref": "#/$defs/bevy_hanabi::attribute::Attribute"
-          }
-        }
-      },
-      "required": [
-        "attr"
-      ],
-      "short_name": "AttributeExpr",
-      "type": "object",
-      "typeInfo": "Struct"
-    },
-    "bevy_hanabi::graph::expr::BinaryOperator": {
-      "isComponent": false,
-      "isResource": false,
-      "long_name": "bevy_hanabi::graph::expr::BinaryOperator",
-      "oneOf": [
-        "Add",
-        "Cross",
-        "Distance",
-        "Div",
-        "Dot",
-        "GreaterThan",
-        "GreaterThanOrEqual",
-        "LessThan",
-        "LessThanOrEqual",
-        "Max",
-        "Min",
-        "Mul",
-        "Remainder",
-        "Step",
-        "Sub",
-        "UniformRand",
-        "Vec2"
-      ],
-      "short_name": "BinaryOperator",
-      "type": "string",
-      "typeInfo": "Enum"
-    },
-    "bevy_hanabi::graph::expr::BuiltInExpr": {
-      "additionalProperties": false,
-      "isComponent": false,
-      "isResource": false,
-      "long_name": "bevy_hanabi::graph::expr::BuiltInExpr",
-      "properties": {
-        "operator": {
-          "type": {
-            "$ref": "#/$defs/bevy_hanabi::graph::expr::BuiltInOperator"
-          }
-        }
-      },
-      "required": [
-        "operator"
-      ],
-      "short_name": "BuiltInExpr",
-      "type": "object",
-      "typeInfo": "Struct"
-    },
-    "bevy_hanabi::graph::expr::BuiltInOperator": {
-      "isComponent": false,
-      "isResource": false,
-      "long_name": "bevy_hanabi::graph::expr::BuiltInOperator",
-      "oneOf": [
-        {
-          "long_name": "Time"
-        },
-        {
-          "long_name": "DeltaTime"
-        },
-        {
-          "long_name": "VirtualTime"
-        },
-        {
-          "long_name": "VirtualDeltaTime"
-        },
-        {
-          "long_name": "RealTime"
-        },
-        {
-          "long_name": "RealDeltaTime"
-        },
-        {
-          "items": false,
-          "long_name": "Rand",
-          "prefixItems": [
-            {
-              "type": {
-                "$ref": "#/$defs/bevy_hanabi::attributes::ValueType"
-              }
-            }
-          ],
-          "short_name": "Rand",
-          "type": "array",
-          "typeInfo": "Tuple"
-        },
-        {
-          "long_name": "AlphaCutoff"
-        },
-        {
-          "long_name": "IsAlive"
-        }
-      ],
-      "short_name": "BuiltInOperator",
-      "type": "object",
-      "typeInfo": "Enum"
-    },
-    "bevy_hanabi::graph::expr::CastExpr": {
-      "additionalProperties": false,
-      "isComponent": false,
-      "isResource": false,
-      "long_name": "bevy_hanabi::graph::expr::CastExpr",
-      "properties": {
-        "inner": {
-          "type": {
-            "$ref": "#/$defs/bevy_hanabi::graph::expr::ExprHandle"
-          }
-        },
-        "target": {
-          "type": {
-            "$ref": "#/$defs/bevy_hanabi::attributes::ValueType"
-          }
-        }
-      },
-      "required": [
-        "inner",
-        "target"
-      ],
-      "short_name": "CastExpr",
-      "type": "object",
-      "typeInfo": "Struct"
-    },
-    "bevy_hanabi::graph::expr::Expr": {
-      "isComponent": false,
-      "isResource": false,
-      "long_name": "bevy_hanabi::graph::expr::Expr",
-      "oneOf": [
-        {
-          "items": false,
-          "long_name": "BuiltIn",
-          "prefixItems": [
-            {
-              "type": {
-                "$ref": "#/$defs/bevy_hanabi::graph::expr::BuiltInExpr"
-              }
-            }
-          ],
-          "short_name": "BuiltIn",
-          "type": "array",
-          "typeInfo": "Tuple"
-        },
-        {
-          "items": false,
-          "long_name": "Literal",
-          "prefixItems": [
-            {
-              "type": {
-                "$ref": "#/$defs/bevy_hanabi::graph::expr::LiteralExpr"
-              }
-            }
-          ],
-          "short_name": "Literal",
-          "type": "array",
-          "typeInfo": "Tuple"
-        },
-        {
-          "items": false,
-          "long_name": "Property",
-          "prefixItems": [
-            {
-              "type": {
-                "$ref": "#/$defs/bevy_hanabi::graph::expr::PropertyExpr"
-              }
-            }
-          ],
-          "short_name": "Property",
-          "type": "array",
-          "typeInfo": "Tuple"
-        },
-        {
-          "items": false,
-          "long_name": "Attribute",
-          "prefixItems": [
-            {
-              "type": {
-                "$ref": "#/$defs/bevy_hanabi::graph::expr::AttributeExpr"
-              }
-            }
-          ],
-          "short_name": "Attribute",
-          "type": "array",
-          "typeInfo": "Tuple"
-        },
-        {
-          "additionalProperties": false,
-          "long_name": "Unary",
-          "properties": {
-            "expr": {
-              "long_name": "expr",
-              "type": {
-                "$ref": "#/$defs/bevy_hanabi::graph::expr::ExprHandle"
-              }
-            },
-            "op": {
-              "long_name": "op",
-              "type": {
-                "$ref": "#/$defs/bevy_hanabi::graph::expr::UnaryOperator"
-              }
-            }
-          },
-          "required": [
-            "op",
-            "expr"
-          ],
-          "short_name": "Unary",
-          "type": "object",
-          "typeInfo": "Struct"
-        },
-        {
-          "additionalProperties": false,
-          "long_name": "Binary",
-          "properties": {
-            "left": {
-              "long_name": "left",
-              "type": {
-                "$ref": "#/$defs/bevy_hanabi::graph::expr::ExprHandle"
-              }
-            },
-            "op": {
-              "long_name": "op",
-              "type": {
-                "$ref": "#/$defs/bevy_hanabi::graph::expr::BinaryOperator"
-              }
-            },
-            "right": {
-              "long_name": "right",
-              "type": {
-                "$ref": "#/$defs/bevy_hanabi::graph::expr::ExprHandle"
-              }
-            }
-          },
-          "required": [
-            "op",
-            "left",
-            "right"
-          ],
-          "short_name": "Binary",
-          "type": "object",
-          "typeInfo": "Struct"
-        },
-        {
-          "additionalProperties": false,
-          "long_name": "Ternary",
-          "properties": {
-            "first": {
-              "long_name": "first",
-              "type": {
-                "$ref": "#/$defs/bevy_hanabi::graph::expr::ExprHandle"
-              }
-            },
-            "op": {
-              "long_name": "op",
-              "type": {
-                "$ref": "#/$defs/bevy_hanabi::graph::expr::TernaryOperator"
-              }
-            },
-            "second": {
-              "long_name": "second",
-              "type": {
-                "$ref": "#/$defs/bevy_hanabi::graph::expr::ExprHandle"
-              }
-            },
-            "third": {
-              "long_name": "third",
-              "type": {
-                "$ref": "#/$defs/bevy_hanabi::graph::expr::ExprHandle"
-              }
-            }
-          },
-          "required": [
-            "op",
-            "first",
-            "second",
-            "third"
-          ],
-          "short_name": "Ternary",
-          "type": "object",
-          "typeInfo": "Struct"
-        },
-        {
-          "items": false,
-          "long_name": "Cast",
-          "prefixItems": [
-            {
-              "type": {
-                "$ref": "#/$defs/bevy_hanabi::graph::expr::CastExpr"
-              }
-            }
-          ],
-          "short_name": "Cast",
-          "type": "array",
-          "typeInfo": "Tuple"
-        }
-      ],
-      "short_name": "Expr",
-      "type": "object",
-      "typeInfo": "Enum"
-    },
-    "bevy_hanabi::graph::expr::ExprHandle": {
-      "additionalProperties": false,
-      "isComponent": false,
-      "isResource": false,
-      "long_name": "bevy_hanabi::graph::expr::ExprHandle",
-      "properties": {
-        "id": {
-          "type": {
-            "$ref": "#/$defs/core::num::NonZeroU32"
-          }
-        }
-      },
-      "required": [
-        "id"
-      ],
-      "short_name": "ExprHandle",
-      "type": "object",
-      "typeInfo": "Struct"
-    },
-    "bevy_hanabi::graph::expr::LiteralExpr": {
-      "additionalProperties": false,
-      "isComponent": false,
-      "isResource": false,
-      "long_name": "bevy_hanabi::graph::expr::LiteralExpr",
-      "properties": {
-        "value": {
-          "type": {
-            "$ref": "#/$defs/bevy_hanabi::graph::Value"
-          }
-        }
-      },
-      "required": [
-        "value"
-      ],
-      "short_name": "LiteralExpr",
-      "type": "object",
-      "typeInfo": "Struct"
-    },
-    "bevy_hanabi::graph::expr::Module": {
-      "additionalProperties": false,
-      "isComponent": false,
-      "isResource": false,
-      "long_name": "bevy_hanabi::graph::expr::Module",
-      "properties": {
-        "expressions": {
-          "type": {
-            "$ref": "#/$defs/alloc::vec::Vec<bevy_hanabi::graph::expr::Expr>"
-          }
-        },
-        "properties": {
-          "type": {
-            "$ref": "#/$defs/alloc::vec::Vec<bevy_hanabi::properties::Property>"
-          }
-        }
-      },
-      "required": [
-        "expressions",
-        "properties"
-      ],
-      "short_name": "Module",
-      "type": "object",
-      "typeInfo": "Struct"
-    },
-    "bevy_hanabi::graph::expr::PropertyExpr": {
-      "additionalProperties": false,
-      "isComponent": false,
-      "isResource": false,
-      "long_name": "bevy_hanabi::graph::expr::PropertyExpr",
-      "properties": {
-        "property": {
-          "type": {
-            "$ref": "#/$defs/bevy_hanabi::graph::expr::PropertyHandle"
-          }
-        }
-      },
-      "required": [
-        "property"
-      ],
-      "short_name": "PropertyExpr",
-      "type": "object",
-      "typeInfo": "Struct"
-    },
-    "bevy_hanabi::graph::expr::PropertyHandle": {
-      "additionalProperties": false,
-      "isComponent": false,
-      "isResource": false,
-      "long_name": "bevy_hanabi::graph::expr::PropertyHandle",
-      "properties": {
-        "id": {
-          "type": {
-            "$ref": "#/$defs/core::num::NonZeroU32"
-          }
-        }
-      },
-      "required": [
-        "id"
-      ],
-      "short_name": "PropertyHandle",
-      "type": "object",
-      "typeInfo": "Struct"
-    },
-    "bevy_hanabi::graph::expr::TernaryOperator": {
-      "isComponent": false,
-      "isResource": false,
-      "long_name": "bevy_hanabi::graph::expr::TernaryOperator",
-      "oneOf": [
-        "Mix",
-        "SmoothStep",
-        "Vec3"
-      ],
-      "short_name": "TernaryOperator",
-      "type": "string",
-      "typeInfo": "Enum"
-    },
-    "bevy_hanabi::graph::expr::UnaryOperator": {
-      "isComponent": false,
-      "isResource": false,
-      "long_name": "bevy_hanabi::graph::expr::UnaryOperator",
-      "oneOf": [
-        "Abs",
-        "All",
-        "Any",
-        "Ceil",
-        "Cos",
-        "Exp",
-        "Exp2",
-        "Floor",
-        "Fract",
-        "InvSqrt",
-        "Length",
-        "Log",
-        "Log2",
-        "Normalize",
-        "Pack4x8snorm",
-        "Pack4x8unorm",
-        "Saturate",
-        "Sign",
-        "Sin",
-        "Sqrt",
-        "Tan",
-        "Unpack4x8snorm",
-        "Unpack4x8unorm",
-        "W",
-        "X",
-        "Y",
-        "Z"
-      ],
-      "short_name": "UnaryOperator",
-      "type": "string",
-      "typeInfo": "Enum"
-    },
-    "bevy_hanabi::properties::EffectProperties": {
-      "additionalProperties": false,
-      "isComponent": true,
-      "isResource": false,
-      "long_name": "bevy_hanabi::properties::EffectProperties",
-      "properties": {
-        "properties": {
-          "type": {
-            "$ref": "#/$defs/alloc::vec::Vec<bevy_hanabi::properties::PropertyInstance>"
-          }
-        }
-      },
-      "required": [
-        "properties"
-      ],
-      "short_name": "EffectProperties",
-      "type": "object",
-      "typeInfo": "Struct"
-    },
-    "bevy_hanabi::properties::Property": {
-      "additionalProperties": false,
-      "isComponent": false,
-      "isResource": false,
-      "long_name": "bevy_hanabi::properties::Property",
-      "properties": {
-        "default_value": {
-          "type": {
-            "$ref": "#/$defs/bevy_hanabi::graph::Value"
-          }
-        },
-        "name": {
-          "type": {
-            "$ref": "#/$defs/alloc::string::String"
-          }
-        }
-      },
-      "required": [
-        "name",
-        "default_value"
-      ],
-      "short_name": "Property",
-      "type": "object",
-      "typeInfo": "Struct"
-    },
-    "bevy_hanabi::properties::PropertyInstance": {
-      "additionalProperties": false,
-      "isComponent": false,
-      "isResource": false,
-      "long_name": "bevy_hanabi::properties::PropertyInstance",
-      "properties": {
-        "def": {
-          "type": {
-            "$ref": "#/$defs/bevy_hanabi::properties::Property"
-          }
-        },
-        "value": {
-          "type": {
-            "$ref": "#/$defs/bevy_hanabi::graph::Value"
-          }
-        }
-      },
-      "required": [
-        "def",
-        "value"
-      ],
-      "short_name": "PropertyInstance",
-      "type": "object",
-      "typeInfo": "Struct"
-    },
-    "bevy_hanabi::spawn::CpuValue<f32>": {
-      "isComponent": false,
-      "isResource": false,
-      "long_name": "bevy_hanabi::spawn::CpuValue<f32>",
-      "oneOf": [
-        {
-          "items": false,
-          "long_name": "Single",
-          "prefixItems": [
-            {
-              "type": {
-                "$ref": "#/$defs/f32"
-              }
-            }
-          ],
-          "short_name": "Single",
-          "type": "array",
-          "typeInfo": "Tuple"
-        },
-        {
-          "items": false,
-          "long_name": "Uniform",
-          "prefixItems": [
-            {
-              "type": {
-                "$ref": "#/$defs/(f32, f32)"
-              }
-            }
-          ],
-          "short_name": "Uniform",
-          "type": "array",
-          "typeInfo": "Tuple"
-        }
-      ],
-      "short_name": "CpuValue<f32>",
-      "type": "object",
-      "typeInfo": "Enum"
-    },
-    "bevy_hanabi::spawn::Spawner": {
-      "additionalProperties": false,
-      "isComponent": false,
-      "isResource": false,
-      "long_name": "bevy_hanabi::spawn::Spawner",
-      "properties": {
-        "num_particles": {
-          "type": {
-            "$ref": "#/$defs/bevy_hanabi::spawn::CpuValue<f32>"
-          }
-        },
-        "period": {
-          "type": {
-            "$ref": "#/$defs/bevy_hanabi::spawn::CpuValue<f32>"
-          }
-        },
-        "spawn_time": {
-          "type": {
-            "$ref": "#/$defs/bevy_hanabi::spawn::CpuValue<f32>"
-          }
-        },
-        "starts_active": {
-          "type": {
-            "$ref": "#/$defs/bool"
-          }
-        },
-        "starts_immediately": {
-          "type": {
-            "$ref": "#/$defs/bool"
-          }
-        }
-      },
-      "required": [
-        "num_particles",
-        "spawn_time",
-        "period",
-        "starts_active",
-        "starts_immediately"
-      ],
-      "short_name": "Spawner",
-      "type": "object",
-      "typeInfo": "Struct"
-    },
-    "bevy_hanabi::time::EffectSimulation": {
-      "additionalProperties": false,
-      "isComponent": false,
-      "isResource": false,
-      "long_name": "bevy_hanabi::time::EffectSimulation",
-      "properties": {
-        "effective_speed": {
-          "type": {
-            "$ref": "#/$defs/f64"
-          }
-        },
-        "paused": {
-          "type": {
-            "$ref": "#/$defs/bool"
-          }
-        },
-        "relative_speed": {
-          "type": {
-            "$ref": "#/$defs/f64"
-          }
-        }
-      },
-      "required": [
-        "paused",
-        "relative_speed",
-        "effective_speed"
-      ],
-      "short_name": "EffectSimulation",
       "type": "object",
       "typeInfo": "Struct"
     },
@@ -7879,6 +6668,1078 @@
       ],
       "short_name": "RaycastVisibility",
       "type": "string",
+      "typeInfo": "Enum"
+    },
+    "bevy_particle_systems::components::AnimatedIndex": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "bevy_particle_systems::components::AnimatedIndex",
+      "properties": {
+        "indices": {
+          "type": {
+            "$ref": "#/$defs/alloc::vec::Vec<usize>"
+          }
+        },
+        "step_offset": {
+          "type": {
+            "$ref": "#/$defs/usize"
+          }
+        },
+        "time_step": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        }
+      },
+      "required": [
+        "indices",
+        "time_step",
+        "step_offset"
+      ],
+      "short_name": "AnimatedIndex",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_particle_systems::components::BurstIndex": {
+      "isComponent": true,
+      "isResource": false,
+      "items": false,
+      "long_name": "bevy_particle_systems::components::BurstIndex",
+      "prefixItems": [
+        {
+          "type": {
+            "$ref": "#/$defs/usize"
+          }
+        }
+      ],
+      "short_name": "BurstIndex",
+      "type": "array",
+      "typeInfo": "TupleStruct"
+    },
+    "bevy_particle_systems::components::ParticleBurst": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "bevy_particle_systems::components::ParticleBurst",
+      "properties": {
+        "count": {
+          "type": {
+            "$ref": "#/$defs/usize"
+          }
+        },
+        "time": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        }
+      },
+      "required": [
+        "time",
+        "count"
+      ],
+      "short_name": "ParticleBurst",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_particle_systems::components::ParticleCount": {
+      "isComponent": true,
+      "isResource": false,
+      "items": false,
+      "long_name": "bevy_particle_systems::components::ParticleCount",
+      "prefixItems": [
+        {
+          "type": {
+            "$ref": "#/$defs/usize"
+          }
+        }
+      ],
+      "short_name": "ParticleCount",
+      "type": "array",
+      "typeInfo": "TupleStruct"
+    },
+    "bevy_particle_systems::components::ParticleSpace": {
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "bevy_particle_systems::components::ParticleSpace",
+      "oneOf": [
+        "Local",
+        "World"
+      ],
+      "short_name": "ParticleSpace",
+      "type": "string",
+      "typeInfo": "Enum"
+    },
+    "bevy_particle_systems::components::ParticleSystem": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "bevy_particle_systems::components::ParticleSystem",
+      "properties": {
+        "bursts": {
+          "type": {
+            "$ref": "#/$defs/alloc::vec::Vec<bevy_particle_systems::components::ParticleBurst>"
+          }
+        },
+        "color": {
+          "type": {
+            "$ref": "#/$defs/bevy_particle_systems::values::ColorOverTime"
+          }
+        },
+        "despawn_on_finish": {
+          "type": {
+            "$ref": "#/$defs/bool"
+          }
+        },
+        "despawn_particles_with_system": {
+          "type": {
+            "$ref": "#/$defs/bool"
+          }
+        },
+        "emitter_shape": {
+          "type": {
+            "$ref": "#/$defs/bevy_particle_systems::values::EmitterShape"
+          }
+        },
+        "initial_rotation": {
+          "type": {
+            "$ref": "#/$defs/bevy_particle_systems::values::JitteredValue"
+          }
+        },
+        "initial_scale": {
+          "type": {
+            "$ref": "#/$defs/bevy_particle_systems::values::JitteredValue"
+          }
+        },
+        "initial_speed": {
+          "type": {
+            "$ref": "#/$defs/bevy_particle_systems::values::JitteredValue"
+          }
+        },
+        "lifetime": {
+          "type": {
+            "$ref": "#/$defs/bevy_particle_systems::values::JitteredValue"
+          }
+        },
+        "looping": {
+          "type": {
+            "$ref": "#/$defs/bool"
+          }
+        },
+        "max_distance": {
+          "type": {
+            "$ref": "#/$defs/core::option::Option<f32>"
+          }
+        },
+        "max_particles": {
+          "type": {
+            "$ref": "#/$defs/usize"
+          }
+        },
+        "rescale_texture": {
+          "type": {
+            "$ref": "#/$defs/core::option::Option<glam::Vec2>"
+          }
+        },
+        "rotate_to_movement_direction": {
+          "type": {
+            "$ref": "#/$defs/bool"
+          }
+        },
+        "rotation_speed": {
+          "type": {
+            "$ref": "#/$defs/bevy_particle_systems::values::JitteredValue"
+          }
+        },
+        "scale": {
+          "type": {
+            "$ref": "#/$defs/bevy_particle_systems::values::ValueOverTime"
+          }
+        },
+        "space": {
+          "type": {
+            "$ref": "#/$defs/bevy_particle_systems::components::ParticleSpace"
+          }
+        },
+        "spawn_rate_per_second": {
+          "type": {
+            "$ref": "#/$defs/bevy_particle_systems::values::ValueOverTime"
+          }
+        },
+        "system_duration_seconds": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        },
+        "texture": {
+          "type": {
+            "$ref": "#/$defs/bevy_particle_systems::components::ParticleTexture"
+          }
+        },
+        "use_scaled_time": {
+          "type": {
+            "$ref": "#/$defs/bool"
+          }
+        },
+        "velocity_modifiers": {
+          "type": {
+            "$ref": "#/$defs/alloc::vec::Vec<bevy_particle_systems::values::VelocityModifier>"
+          }
+        },
+        "z_value_override": {
+          "type": {
+            "$ref": "#/$defs/core::option::Option<bevy_particle_systems::values::JitteredValue>"
+          }
+        }
+      },
+      "required": [
+        "max_particles",
+        "texture",
+        "spawn_rate_per_second",
+        "emitter_shape",
+        "initial_speed",
+        "velocity_modifiers",
+        "lifetime",
+        "color",
+        "initial_scale",
+        "scale",
+        "initial_rotation",
+        "rotation_speed",
+        "rotate_to_movement_direction",
+        "looping",
+        "system_duration_seconds",
+        "bursts",
+        "space",
+        "use_scaled_time",
+        "despawn_on_finish",
+        "despawn_particles_with_system"
+      ],
+      "short_name": "ParticleSystem",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_particle_systems::components::ParticleTexture": {
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "bevy_particle_systems::components::ParticleTexture",
+      "oneOf": [
+        {
+          "items": false,
+          "long_name": "Sprite",
+          "prefixItems": [
+            {
+              "type": {
+                "$ref": "#/$defs/bevy_asset::handle::Handle<bevy_render::texture::image::Image>"
+              }
+            }
+          ],
+          "short_name": "Sprite",
+          "type": "array",
+          "typeInfo": "Tuple"
+        },
+        {
+          "additionalProperties": false,
+          "long_name": "TextureAtlas",
+          "properties": {
+            "atlas": {
+              "long_name": "atlas",
+              "type": {
+                "$ref": "#/$defs/bevy_asset::handle::Handle<bevy_sprite::texture_atlas::TextureAtlasLayout>"
+              }
+            },
+            "index": {
+              "long_name": "index",
+              "type": {
+                "$ref": "#/$defs/bevy_particle_systems::values::AtlasIndex"
+              }
+            },
+            "texture": {
+              "long_name": "texture",
+              "type": {
+                "$ref": "#/$defs/bevy_asset::handle::Handle<bevy_render::texture::image::Image>"
+              }
+            }
+          },
+          "required": [
+            "texture",
+            "atlas",
+            "index"
+          ],
+          "short_name": "TextureAtlas",
+          "type": "object",
+          "typeInfo": "Struct"
+        }
+      ],
+      "short_name": "ParticleTexture",
+      "type": "object",
+      "typeInfo": "Enum"
+    },
+    "bevy_particle_systems::components::RunningState": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "bevy_particle_systems::components::RunningState",
+      "properties": {
+        "current_second": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        },
+        "running_time": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        },
+        "spawned_this_second": {
+          "type": {
+            "$ref": "#/$defs/usize"
+          }
+        }
+      },
+      "required": [
+        "running_time",
+        "current_second",
+        "spawned_this_second"
+      ],
+      "short_name": "RunningState",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_particle_systems::values::AtlasIndex": {
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "bevy_particle_systems::values::AtlasIndex",
+      "oneOf": [
+        {
+          "items": false,
+          "long_name": "Constant",
+          "prefixItems": [
+            {
+              "type": {
+                "$ref": "#/$defs/usize"
+              }
+            }
+          ],
+          "short_name": "Constant",
+          "type": "array",
+          "typeInfo": "Tuple"
+        },
+        {
+          "items": false,
+          "long_name": "Random",
+          "prefixItems": [
+            {
+              "type": {
+                "$ref": "#/$defs/bevy_particle_systems::values::RandomValue<usize>"
+              }
+            }
+          ],
+          "short_name": "Random",
+          "type": "array",
+          "typeInfo": "Tuple"
+        },
+        {
+          "items": false,
+          "long_name": "Animated",
+          "prefixItems": [
+            {
+              "type": {
+                "$ref": "#/$defs/bevy_particle_systems::components::AnimatedIndex"
+              }
+            }
+          ],
+          "short_name": "Animated",
+          "type": "array",
+          "typeInfo": "Tuple"
+        }
+      ],
+      "short_name": "AtlasIndex",
+      "type": "object",
+      "typeInfo": "Enum"
+    },
+    "bevy_particle_systems::values::CircleSegment": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "bevy_particle_systems::values::CircleSegment",
+      "properties": {
+        "direction_angle": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        },
+        "opening_angle": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        },
+        "radius": {
+          "type": {
+            "$ref": "#/$defs/bevy_particle_systems::values::JitteredValue"
+          }
+        }
+      },
+      "required": [
+        "opening_angle",
+        "direction_angle",
+        "radius"
+      ],
+      "short_name": "CircleSegment",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_particle_systems::values::ColorOverTime": {
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "bevy_particle_systems::values::ColorOverTime",
+      "oneOf": [
+        {
+          "items": false,
+          "long_name": "Constant",
+          "prefixItems": [
+            {
+              "type": {
+                "$ref": "#/$defs/bevy_color::color::Color"
+              }
+            }
+          ],
+          "short_name": "Constant",
+          "type": "array",
+          "typeInfo": "Tuple"
+        },
+        {
+          "items": false,
+          "long_name": "Lerp",
+          "prefixItems": [
+            {
+              "type": {
+                "$ref": "#/$defs/bevy_particle_systems::values::Lerp<bevy_color::color::Color>"
+              }
+            }
+          ],
+          "short_name": "Lerp",
+          "type": "array",
+          "typeInfo": "Tuple"
+        },
+        {
+          "items": false,
+          "long_name": "Gradient",
+          "prefixItems": [
+            {
+              "type": {
+                "$ref": "#/$defs/bevy_particle_systems::values::Curve<bevy_color::color::Color>"
+              }
+            }
+          ],
+          "short_name": "Gradient",
+          "type": "array",
+          "typeInfo": "Tuple"
+        }
+      ],
+      "short_name": "ColorOverTime",
+      "type": "object",
+      "typeInfo": "Enum"
+    },
+    "bevy_particle_systems::values::Curve<bevy_color::color::Color>": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "bevy_particle_systems::values::Curve<bevy_color::color::Color>",
+      "properties": {
+        "index_hint": {
+          "type": {
+            "$ref": "#/$defs/usize"
+          }
+        },
+        "points": {
+          "type": {
+            "$ref": "#/$defs/alloc::vec::Vec<bevy_particle_systems::values::CurvePoint<bevy_color::color::Color>>"
+          }
+        }
+      },
+      "required": [
+        "points",
+        "index_hint"
+      ],
+      "short_name": "Curve<Color>",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_particle_systems::values::Curve<f32>": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "bevy_particle_systems::values::Curve<f32>",
+      "properties": {
+        "index_hint": {
+          "type": {
+            "$ref": "#/$defs/usize"
+          }
+        },
+        "points": {
+          "type": {
+            "$ref": "#/$defs/alloc::vec::Vec<bevy_particle_systems::values::CurvePoint<f32>>"
+          }
+        }
+      },
+      "required": [
+        "points",
+        "index_hint"
+      ],
+      "short_name": "Curve<f32>",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_particle_systems::values::Curve<glam::Vec3>": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "bevy_particle_systems::values::Curve<glam::Vec3>",
+      "properties": {
+        "index_hint": {
+          "type": {
+            "$ref": "#/$defs/usize"
+          }
+        },
+        "points": {
+          "type": {
+            "$ref": "#/$defs/alloc::vec::Vec<bevy_particle_systems::values::CurvePoint<glam::Vec3>>"
+          }
+        }
+      },
+      "required": [
+        "points",
+        "index_hint"
+      ],
+      "short_name": "Curve<Vec3>",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_particle_systems::values::CurvePoint<bevy_color::color::Color>": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "bevy_particle_systems::values::CurvePoint<bevy_color::color::Color>",
+      "properties": {
+        "point": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        },
+        "value": {
+          "type": {
+            "$ref": "#/$defs/bevy_color::color::Color"
+          }
+        }
+      },
+      "required": [
+        "value",
+        "point"
+      ],
+      "short_name": "CurvePoint<Color>",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_particle_systems::values::CurvePoint<f32>": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "bevy_particle_systems::values::CurvePoint<f32>",
+      "properties": {
+        "point": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        },
+        "value": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        }
+      },
+      "required": [
+        "value",
+        "point"
+      ],
+      "short_name": "CurvePoint<f32>",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_particle_systems::values::CurvePoint<glam::Vec3>": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "bevy_particle_systems::values::CurvePoint<glam::Vec3>",
+      "properties": {
+        "point": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        },
+        "value": {
+          "type": {
+            "$ref": "#/$defs/glam::Vec3"
+          }
+        }
+      },
+      "required": [
+        "value",
+        "point"
+      ],
+      "short_name": "CurvePoint<Vec3>",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_particle_systems::values::EmitterShape": {
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "bevy_particle_systems::values::EmitterShape",
+      "oneOf": [
+        {
+          "items": false,
+          "long_name": "CircleSegment",
+          "prefixItems": [
+            {
+              "type": {
+                "$ref": "#/$defs/bevy_particle_systems::values::CircleSegment"
+              }
+            }
+          ],
+          "short_name": "CircleSegment",
+          "type": "array",
+          "typeInfo": "Tuple"
+        },
+        {
+          "items": false,
+          "long_name": "Line",
+          "prefixItems": [
+            {
+              "type": {
+                "$ref": "#/$defs/bevy_particle_systems::values::Line"
+              }
+            }
+          ],
+          "short_name": "Line",
+          "type": "array",
+          "typeInfo": "Tuple"
+        }
+      ],
+      "short_name": "EmitterShape",
+      "type": "object",
+      "typeInfo": "Enum"
+    },
+    "bevy_particle_systems::values::JitteredValue": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "bevy_particle_systems::values::JitteredValue",
+      "properties": {
+        "jitter_range": {
+          "type": {
+            "$ref": "#/$defs/core::option::Option<core::ops::Range<f32>>"
+          }
+        },
+        "value": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "short_name": "JitteredValue",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_particle_systems::values::Lerp<bevy_color::color::Color>": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "bevy_particle_systems::values::Lerp<bevy_color::color::Color>",
+      "properties": {
+        "a": {
+          "type": {
+            "$ref": "#/$defs/bevy_color::color::Color"
+          }
+        },
+        "b": {
+          "type": {
+            "$ref": "#/$defs/bevy_color::color::Color"
+          }
+        }
+      },
+      "required": [
+        "a",
+        "b"
+      ],
+      "short_name": "Lerp<Color>",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_particle_systems::values::Lerp<f32>": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "bevy_particle_systems::values::Lerp<f32>",
+      "properties": {
+        "a": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        },
+        "b": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        }
+      },
+      "required": [
+        "a",
+        "b"
+      ],
+      "short_name": "Lerp<f32>",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_particle_systems::values::Lerp<glam::Vec3>": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "bevy_particle_systems::values::Lerp<glam::Vec3>",
+      "properties": {
+        "a": {
+          "type": {
+            "$ref": "#/$defs/glam::Vec3"
+          }
+        },
+        "b": {
+          "type": {
+            "$ref": "#/$defs/glam::Vec3"
+          }
+        }
+      },
+      "required": [
+        "a",
+        "b"
+      ],
+      "short_name": "Lerp<Vec3>",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_particle_systems::values::Line": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "bevy_particle_systems::values::Line",
+      "properties": {
+        "angle": {
+          "type": {
+            "$ref": "#/$defs/bevy_particle_systems::values::JitteredValue"
+          }
+        },
+        "length": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        }
+      },
+      "required": [
+        "length",
+        "angle"
+      ],
+      "short_name": "Line",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_particle_systems::values::Noise2D": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "bevy_particle_systems::values::Noise2D",
+      "properties": {
+        "amplitude": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        },
+        "frequency": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        },
+        "translation": {
+          "type": {
+            "$ref": "#/$defs/glam::Vec2"
+          }
+        }
+      },
+      "required": [
+        "frequency",
+        "amplitude",
+        "translation"
+      ],
+      "short_name": "Noise2D",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_particle_systems::values::RandomValue<usize>": {
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "bevy_particle_systems::values::RandomValue<usize>",
+      "oneOf": [
+        {
+          "items": false,
+          "long_name": "Constant",
+          "prefixItems": [
+            {
+              "type": {
+                "$ref": "#/$defs/usize"
+              }
+            }
+          ],
+          "short_name": "Constant",
+          "type": "array",
+          "typeInfo": "Tuple"
+        },
+        {
+          "items": false,
+          "long_name": "RandomChoice",
+          "prefixItems": [
+            {
+              "type": {
+                "$ref": "#/$defs/alloc::vec::Vec<usize>"
+              }
+            }
+          ],
+          "short_name": "RandomChoice",
+          "type": "array",
+          "typeInfo": "Tuple"
+        }
+      ],
+      "short_name": "RandomValue<usize>",
+      "type": "object",
+      "typeInfo": "Enum"
+    },
+    "bevy_particle_systems::values::SinWave": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "bevy_particle_systems::values::SinWave",
+      "properties": {
+        "amplitude": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        },
+        "period": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        },
+        "phase_shift": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        },
+        "vertical_shift": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        }
+      },
+      "required": [
+        "amplitude",
+        "period",
+        "phase_shift",
+        "vertical_shift"
+      ],
+      "short_name": "SinWave",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_particle_systems::values::ValueOverTime": {
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "bevy_particle_systems::values::ValueOverTime",
+      "oneOf": [
+        {
+          "items": false,
+          "long_name": "Lerp",
+          "prefixItems": [
+            {
+              "type": {
+                "$ref": "#/$defs/bevy_particle_systems::values::Lerp<f32>"
+              }
+            }
+          ],
+          "short_name": "Lerp",
+          "type": "array",
+          "typeInfo": "Tuple"
+        },
+        {
+          "items": false,
+          "long_name": "Curve",
+          "prefixItems": [
+            {
+              "type": {
+                "$ref": "#/$defs/bevy_particle_systems::values::Curve<f32>"
+              }
+            }
+          ],
+          "short_name": "Curve",
+          "type": "array",
+          "typeInfo": "Tuple"
+        },
+        {
+          "items": false,
+          "long_name": "Sin",
+          "prefixItems": [
+            {
+              "type": {
+                "$ref": "#/$defs/bevy_particle_systems::values::SinWave"
+              }
+            }
+          ],
+          "short_name": "Sin",
+          "type": "array",
+          "typeInfo": "Tuple"
+        },
+        {
+          "items": false,
+          "long_name": "Constant",
+          "prefixItems": [
+            {
+              "type": {
+                "$ref": "#/$defs/f32"
+              }
+            }
+          ],
+          "short_name": "Constant",
+          "type": "array",
+          "typeInfo": "Tuple"
+        }
+      ],
+      "short_name": "ValueOverTime",
+      "type": "object",
+      "typeInfo": "Enum"
+    },
+    "bevy_particle_systems::values::VectorOverTime": {
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "bevy_particle_systems::values::VectorOverTime",
+      "oneOf": [
+        {
+          "items": false,
+          "long_name": "Constant",
+          "prefixItems": [
+            {
+              "type": {
+                "$ref": "#/$defs/glam::Vec3"
+              }
+            }
+          ],
+          "short_name": "Constant",
+          "type": "array",
+          "typeInfo": "Tuple"
+        },
+        {
+          "items": false,
+          "long_name": "Lerp",
+          "prefixItems": [
+            {
+              "type": {
+                "$ref": "#/$defs/bevy_particle_systems::values::Lerp<glam::Vec3>"
+              }
+            }
+          ],
+          "short_name": "Lerp",
+          "type": "array",
+          "typeInfo": "Tuple"
+        },
+        {
+          "items": false,
+          "long_name": "Gradient",
+          "prefixItems": [
+            {
+              "type": {
+                "$ref": "#/$defs/bevy_particle_systems::values::Curve<glam::Vec3>"
+              }
+            }
+          ],
+          "short_name": "Gradient",
+          "type": "array",
+          "typeInfo": "Tuple"
+        }
+      ],
+      "short_name": "VectorOverTime",
+      "type": "object",
+      "typeInfo": "Enum"
+    },
+    "bevy_particle_systems::values::VelocityModifier": {
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "bevy_particle_systems::values::VelocityModifier",
+      "oneOf": [
+        {
+          "items": false,
+          "long_name": "Scalar",
+          "prefixItems": [
+            {
+              "type": {
+                "$ref": "#/$defs/bevy_particle_systems::values::ValueOverTime"
+              }
+            }
+          ],
+          "short_name": "Scalar",
+          "type": "array",
+          "typeInfo": "Tuple"
+        },
+        {
+          "items": false,
+          "long_name": "Vector",
+          "prefixItems": [
+            {
+              "type": {
+                "$ref": "#/$defs/bevy_particle_systems::values::VectorOverTime"
+              }
+            }
+          ],
+          "short_name": "Vector",
+          "type": "array",
+          "typeInfo": "Tuple"
+        },
+        {
+          "items": false,
+          "long_name": "Drag",
+          "prefixItems": [
+            {
+              "type": {
+                "$ref": "#/$defs/bevy_particle_systems::values::ValueOverTime"
+              }
+            }
+          ],
+          "short_name": "Drag",
+          "type": "array",
+          "typeInfo": "Tuple"
+        },
+        {
+          "items": false,
+          "long_name": "Noise",
+          "prefixItems": [
+            {
+              "type": {
+                "$ref": "#/$defs/bevy_particle_systems::values::Noise2D"
+              }
+            }
+          ],
+          "short_name": "Noise",
+          "type": "array",
+          "typeInfo": "Tuple"
+        }
+      ],
+      "short_name": "VelocityModifier",
+      "type": "object",
       "typeInfo": "Enum"
     },
     "bevy_pbr::bundle::CascadesVisibleEntities": {
@@ -11364,85 +11225,6 @@
         "elapsed_seconds_wrapped_f64"
       ],
       "short_name": "Time<()>",
-      "type": "object",
-      "typeInfo": "Struct"
-    },
-    "bevy_time::time::Time<bevy_hanabi::time::EffectSimulation>": {
-      "additionalProperties": false,
-      "isComponent": false,
-      "isResource": true,
-      "long_name": "bevy_time::time::Time<bevy_hanabi::time::EffectSimulation>",
-      "properties": {
-        "context": {
-          "type": {
-            "$ref": "#/$defs/bevy_hanabi::time::EffectSimulation"
-          }
-        },
-        "delta": {
-          "type": {
-            "$ref": "#/$defs/bevy_utils::Duration"
-          }
-        },
-        "delta_seconds": {
-          "type": {
-            "$ref": "#/$defs/f32"
-          }
-        },
-        "delta_seconds_f64": {
-          "type": {
-            "$ref": "#/$defs/f64"
-          }
-        },
-        "elapsed": {
-          "type": {
-            "$ref": "#/$defs/bevy_utils::Duration"
-          }
-        },
-        "elapsed_seconds": {
-          "type": {
-            "$ref": "#/$defs/f32"
-          }
-        },
-        "elapsed_seconds_f64": {
-          "type": {
-            "$ref": "#/$defs/f64"
-          }
-        },
-        "elapsed_seconds_wrapped": {
-          "type": {
-            "$ref": "#/$defs/f32"
-          }
-        },
-        "elapsed_seconds_wrapped_f64": {
-          "type": {
-            "$ref": "#/$defs/f64"
-          }
-        },
-        "elapsed_wrapped": {
-          "type": {
-            "$ref": "#/$defs/bevy_utils::Duration"
-          }
-        },
-        "wrap_period": {
-          "type": {
-            "$ref": "#/$defs/bevy_utils::Duration"
-          }
-        }
-      },
-      "required": [
-        "context",
-        "wrap_period",
-        "delta",
-        "delta_seconds",
-        "delta_seconds_f64",
-        "elapsed",
-        "elapsed_seconds",
-        "elapsed_seconds_f64",
-        "elapsed_wrapped",
-        "elapsed_seconds_wrapped",
-        "elapsed_seconds_wrapped_f64"
-      ],
-      "short_name": "Time<EffectSimulation>",
       "type": "object",
       "typeInfo": "Struct"
     },
@@ -14960,6 +14742,33 @@
       "type": "object",
       "typeInfo": "Enum"
     },
+    "core::option::Option<bevy_particle_systems::values::JitteredValue>": {
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "core::option::Option<bevy_particle_systems::values::JitteredValue>",
+      "oneOf": [
+        {
+          "long_name": "None"
+        },
+        {
+          "items": false,
+          "long_name": "Some",
+          "prefixItems": [
+            {
+              "type": {
+                "$ref": "#/$defs/bevy_particle_systems::values::JitteredValue"
+              }
+            }
+          ],
+          "short_name": "Some",
+          "type": "array",
+          "typeInfo": "Tuple"
+        }
+      ],
+      "short_name": "Option<JitteredValue>",
+      "type": "object",
+      "typeInfo": "Enum"
+    },
     "core::option::Option<bevy_render::camera::camera::Viewport>": {
       "isComponent": false,
       "isResource": false,
@@ -15227,6 +15036,33 @@
         }
       ],
       "short_name": "Option<NonZeroU32>",
+      "type": "object",
+      "typeInfo": "Enum"
+    },
+    "core::option::Option<core::ops::Range<f32>>": {
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "core::option::Option<core::ops::Range<f32>>",
+      "oneOf": [
+        {
+          "long_name": "None"
+        },
+        {
+          "items": false,
+          "long_name": "Some",
+          "prefixItems": [
+            {
+              "type": {
+                "$ref": "#/$defs/core::ops::Range<f32>"
+              }
+            }
+          ],
+          "short_name": "Some",
+          "type": "array",
+          "typeInfo": "Tuple"
+        }
+      ],
+      "short_name": "Option<Range<f32>>",
       "type": "object",
       "typeInfo": "Enum"
     },
@@ -15979,6 +15815,8 @@
       "oneOf": [
         "Up",
         "Down",
+        "DecorationUp",
+        "DecorationDown",
         "None"
       ],
       "short_name": "AnchorColor",
