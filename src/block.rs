@@ -114,7 +114,7 @@ fn add_colliders(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     for (entity, aabb) in &query {
-        commands.entity(entity).insert(ProcessedCollider).insert(Collider(Box::new(parry3d::shape::Cuboid { half_extents: [aabb.half_extents.x, aabb.half_extents.y, aabb.half_extents.z].into() })));
+        commands.entity(entity).insert(ProcessedCollider).insert(Collider(Box::new(parry3d::shape::Cuboid { half_extents: [aabb.half_extents.x * 0.9, aabb.half_extents.y * 0.9, aabb.half_extents.z * 0.9].into() })));
     }
 }
 
@@ -128,13 +128,12 @@ fn test_colliders(
         collisions.entry(entity_b).or_default();
         let t_a = transform_a.translation();
         let t_b = transform_b.translation();
-        if parry3d::query::contact(
+        if parry3d::query::intersection_test(
             &[t_a.x, t_a.y, t_a.z].into(),
             collider_a.0.as_ref(),
             &[t_b.x, t_b.y, t_b.z].into(),
             collider_b.0.as_ref(),
-            -4.0,
-        ).unwrap().is_some() {
+        ).unwrap() {
             collisions.entry(entity_a).or_default().push(entity_b);
             collisions.entry(entity_b).or_default().push(entity_a);
         }
@@ -156,20 +155,19 @@ fn check_anchor_clearance(
         for (anchor_transform, anchor_color, ref mut anchor_state) in anchors.0.iter_mut() {
             if *anchor_color == AnchorColor::Up && matches!(anchor_state, AnchorState::Clear | AnchorState::Blocked(_)) {
                 *anchor_state = AnchorState::Clear;
-                let t_a = base_transform.translation() + *anchor_transform;
-                let anchor_collider = parry3d::shape::Cuboid { half_extents: [1.0, 1.0, 1.0].into() };
+                let t_a = base_transform.translation() + *anchor_transform + Vec3::new(0.0, 1.0, 0.0);
+                let anchor_collider = parry3d::shape::Cuboid { half_extents: [0.5, 0.5, 0.5].into() };
                 for (block_entity, block_transform, block_collider) in &blocks {
                     if anchor_entity == block_entity {
                         continue
                     }
                     let t_b = block_transform.translation();
-                    if parry3d::query::contact(
+                    if parry3d::query::intersection_test(
                         &[t_a.x, t_a.y, t_a.z].into(),
                         &anchor_collider,
                         &[t_b.x, t_b.y, t_b.z].into(),
                         block_collider.0.as_ref(),
-                        -4.0,
-                    ).unwrap().is_some() {
+                    ).unwrap() {
                         *anchor_state = AnchorState::Blocked(block_entity);
                     }
                 }

@@ -222,8 +222,9 @@ fn follow_mouse(
         maybe_pos.x = mouse_pos.0.x;
         maybe_pos.y = mouse_pos.0.y;
 
+        let mut min_distance = std::f32::INFINITY;
         if in_collision.is_none() {
-            'outer: for (other_entity, other_transform, other_anchors) in &others {
+            for (other_entity, other_transform, other_anchors) in &others {
                 for (a_anchor, (anchor, color, anchor_state)) in anchors.0.iter().enumerate() {
                     if !(matches!(anchor_state, AnchorState::Clear) || matches!(anchor_state, AnchorState::Blocked(e) if *e == other_entity)) {
                         snap_dirty = true;
@@ -235,18 +236,21 @@ fn follow_mouse(
                             continue
                         }
                         let d = (maybe_pos + *anchor)-(other_transform.translation + *other_anchor);
-                        if d.length() < SNAP_DISTANCE*CAMERA_SCALE {
-                            maybe_pos.x -= d.x;
-                            maybe_pos.y -= d.y;
-                            snapped = Some(Snapped {
-                                a_entity: entity,
-                                a_anchor,
-                                b_entity: other_entity,
-                                b_anchor,
-                                a_translation: maybe_pos,
-                            });
+                        let dist = d.length();
+                        if dist < SNAP_DISTANCE*CAMERA_SCALE {
+                            if dist < min_distance {
+                                min_distance = dist;
+                                maybe_pos.x -= d.x;
+                                maybe_pos.y -= d.y;
+                                snapped = Some(Snapped {
+                                    a_entity: entity,
+                                    a_anchor,
+                                    b_entity: other_entity,
+                                    b_anchor,
+                                    a_translation: maybe_pos,
+                                });
+                            }
                             snap_dirty = true;
-                            break 'outer;
                         }
                     }
                 }
@@ -359,6 +363,7 @@ fn check_completion(
     time: Res<Time>,
     mut next_state: ResMut<NextState<PhasePhase>>,
     mut delay: Local<bevy::time::Stopwatch>,
+    keyboard: Res<ButtonInput<KeyCode>>,
 ) {
     delay.tick(time.delta());
     if !in_drag.is_empty() {
@@ -380,8 +385,12 @@ fn check_completion(
         }
     }
 
+    if keyboard.pressed(KeyCode::Space) {
+        done = Some(true);
+    }
+
     if done.unwrap_or(false) {
-        if delay.elapsed() > std::time::Duration::from_millis(500) {
+        if delay.elapsed() > std::time::Duration::from_millis(250) {
             for mut sky in &mut sky {
                 sky.to_night(time.elapsed());
             }

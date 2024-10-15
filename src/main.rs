@@ -17,7 +17,7 @@ mod block;
 mod environmental_decoration;
 
 pub const CAMERA_SCALE: f32 = 0.05;
-const SNAP_DISTANCE: f32 = 25.0;
+const SNAP_DISTANCE: f32 = 30.0;
 include!(concat!(env!("OUT_DIR"), "/consts.rs"));
 
 #[derive(States, Debug, Clone, PartialEq, Eq, Hash)]
