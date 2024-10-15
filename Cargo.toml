@@ -21,7 +21,7 @@ strip = "debuginfo"
 
 
 [dependencies]
-bevy = { version = "0.14.2", features = ["dynamic_linking", "jpeg"] }
+bevy = { version = "0.14.2", features = ["dynamic_linking", "jpeg", "file_watcher"] }
 bevy-inspector-egui = "0.26.0"
 bevy_mod_picking = "0.20.1"
 bevy_particle_systems = "0.13.0"

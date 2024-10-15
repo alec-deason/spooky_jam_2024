@@ -10,7 +10,7 @@ const NORMAL_BUTTON: Color = Color::srgb(0.15, 0.15, 0.15);
 const HOVERED_BUTTON: Color = Color::srgb(0.25, 0.25, 0.25);
 const PRESSED_BUTTON: Color = Color::srgb(0.35, 0.75, 0.35);
 
-use crate::{GameState, block::Block};
+use crate::{GameState, block::Block, decay_phase::Decayed};
 
 pub struct ScoringPhasePlugin;
 
@@ -104,7 +104,7 @@ fn update_score_text(
 
 fn score(
     mut commands: Commands,
-    query: Query<(Entity, &GlobalTransform), (With<Block>, Without<Scored>)>,
+    query: Query<(Entity, &GlobalTransform), (With<Decayed>, Without<Scored>)>,
     mut stopwatch: Local<Stopwatch>,
     time: Res<Time>,
     mut score: ResMut<TotalScore>,
@@ -118,28 +118,30 @@ fn score(
     for (entity, transform) in &query {
         score.0 += 1;
         commands.entity(entity).insert(Scored);
-        commands
-            // Add the bundle specifying the particle system itself.
-            .spawn(ParticleSystemBundle {
-                transform: transform.clone().into(),
+        println!("POOP");
+                commands.spawn((
+            ParticleSystemBundle {
+                transform: Transform::from_translation(Vec3::new(0.0, 0.0, 10.0)),
                 particle_system: ParticleSystem {
-                    max_particles: 10_000,
-                    texture: ParticleTexture::Sprite(asset_server.load("px.png")),
-                    spawn_rate_per_second: 25.0.into(),
-                    initial_speed: JitteredValue::jittered(3.0, -1.0..1.0),
-                    lifetime: JitteredValue::jittered(8.0, -2.0..2.0),
-                    color: ColorOverTime::Gradient(Curve::new(vec![
-                        CurvePoint::new(Color::WHITE, 0.0),
-                        CurvePoint::new(Color::srgba(0.0, 0.0, 1.0, 0.0), 1.0),
-                    ])),
-                    looping: true,
-                    system_duration_seconds: 10.0,
-                    ..ParticleSystem::default()
+                    spawn_rate_per_second: 0.0.into(),
+                    max_particles: 1_000,
+                    initial_speed: (0.0..300.0).into(),
+                    scale: 2.0.into(),
+                    velocity_modifiers: vec![
+                        VelocityModifier::Drag(0.001.into()),
+                        VelocityModifier::Vector(Vec3::new(0.0, -400.0, 0.0).into()),
+                    ],
+                    color: (BLUE.into()..Color::srgba(1.0, 0.0, 0.0, 0.0)).into(),
+                    bursts: vec![ParticleBurst {
+                        time: 0.0,
+                        count: 1000,
+                    }],
+                    ..ParticleSystem::oneshot()
                 },
-                ..ParticleSystemBundle::default()
-            })
-            // Add the playing component so it starts playing. This can be added later as well.
-            .insert(Playing);
+                ..default()
+            },
+            Playing,
+        ));
         return
     }
 }

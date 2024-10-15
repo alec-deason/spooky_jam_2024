@@ -240,8 +240,8 @@ fn follow_mouse(
                         if dist < SNAP_DISTANCE*CAMERA_SCALE {
                             if dist < min_distance {
                                 min_distance = dist;
-                                maybe_pos.x -= d.x;
-                                maybe_pos.y -= d.y;
+                                maybe_pos.x = mouse_pos.0.x - d.x;
+                                maybe_pos.y = mouse_pos.0.y - d.y;
                                 snapped = Some(Snapped {
                                     a_entity: entity,
                                     a_anchor,

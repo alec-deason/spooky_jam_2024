@@ -85,7 +85,8 @@ impl Plugin for BlockPlugin {
             .register_type::<PickSelection>()
             .register_type::<PickHighlight>()
             .register_type::<Block>()
-            .add_systems(Update, (add_colliders, test_colliders, configure_anchors, lift_component::<DecayedRepresentation>))
+            .add_systems(PreUpdate, test_colliders)
+            .add_systems(Update, (add_colliders, configure_anchors, lift_component::<DecayedRepresentation>))
             .add_systems(PostUpdate, check_anchor_clearance);
     }
 }
