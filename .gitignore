@@ -5,3 +5,4 @@ assets/materials
 assets/blueprints
 *.ts
 *.wasm
+**/auto-backups/**

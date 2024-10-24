@@ -1,16 +1,22 @@
+use std::time::Duration;
+
 use bevy::{
     prelude::*,
     time::Stopwatch,
     color::palettes::basic::*,
 };
-use blenvy::BlueprintInfo;
+use blenvy::{
+    BlueprintInfo,
+    BlueprintAnimationPlayerLink, BlueprintAnimations,
+};
 use bevy_particle_systems::*;
+use bevy_kira_audio::prelude::*;
 
 const NORMAL_BUTTON: Color = Color::srgb(0.15, 0.15, 0.15);
 const HOVERED_BUTTON: Color = Color::srgb(0.25, 0.25, 0.25);
 const PRESSED_BUTTON: Color = Color::srgb(0.35, 0.75, 0.35);
 
-use crate::{GameState, block::Block, decay_phase::Decayed};
+use crate::{GameState, block::Block, decay_phase::{Decayed, DarkFigureBody}, music::{Music, BackgroundMusic}};
 
 pub struct ScoringPhasePlugin;
 
@@ -32,7 +38,7 @@ impl Plugin for ScoringPhasePlugin {
             .insert_resource(TotalScore(0))
             .add_systems(Startup, setup)
             .add_systems(Update, (score, update_score_text, button_system).run_if(in_state(GameState::ScoringPhase)))
-            .add_systems(OnEnter(GameState::ScoringPhase), show_text)
+            .add_systems(OnEnter(GameState::ScoringPhase), (hide_dark_figure, show_text, start_scoring_loop))
             .add_systems(OnExit(GameState::ScoringPhase), cleanup)
         ;
     }
@@ -40,6 +46,41 @@ impl Plugin for ScoringPhasePlugin {
 
 fn setup(
 ) {
+}
+
+fn hide_dark_figure(
+    mut commands: Commands,
+    animations: Query<(&BlueprintAnimationPlayerLink, &BlueprintAnimations), With<DarkFigureBody>>,
+    mut animation_players: Query<(&mut AnimationPlayer, &mut AnimationTransitions)>,
+) {
+    for (link, animations) in animations.iter() {
+        let (mut animation_player, mut transition) =
+            animation_players.get_mut(link.0).unwrap();
+        if let Some(emerge_animation) = animations.named_indices.get("hide") {
+            println!("THING");
+            transition
+                .play(&mut animation_player, *emerge_animation, std::time::Duration::from_secs(1));
+        }
+    }
+}
+fn start_scoring_loop(
+    mut background: ResMut<BackgroundMusic>,
+    music: Res<Music>,
+    audio: Res<Audio>,
+    mut instances: ResMut<Assets<AudioInstance>>,
+) {
+    if let Some(player) = background.1.as_ref().and_then(|h| instances.get_mut(h)) {
+        player.stop(AudioTween::linear(Duration::from_secs(1)));
+    }
+    if let Some(cur) = audio.state(&background.0).position() {
+        let handle = audio
+            .play(music.scoring_overlay.clone())
+            .start_from(cur)
+            .fade_in(AudioTween::linear(Duration::from_secs(1)))
+            .looped()
+            .handle();
+        background.1 = Some(handle);
+    }
 }
 
 fn show_text(
@@ -82,7 +123,7 @@ fn show_text(
                     ..default()
                 })
                 .with_children(|parent| {parent.spawn(TextBundle::from_section(
-                    "Button",
+                    "Replay",
                     TextStyle {
                         font_size: 33.0,
                         color: Color::srgb(0.9, 0.9, 0.9),
@@ -118,7 +159,6 @@ fn score(
     for (entity, transform) in &query {
         score.0 += 1;
         commands.entity(entity).insert(Scored);
-        println!("POOP");
                 commands.spawn((
             ParticleSystemBundle {
                 transform: Transform::from_translation(Vec3::new(0.0, 0.0, 10.0)),
@@ -168,12 +208,10 @@ fn button_system(
                 score.0 = 0;
             }
             Interaction::Hovered => {
-                text.sections[0].value = "Hover".to_string();
                 *color = HOVERED_BUTTON.into();
                 border_color.0 = Color::WHITE;
             }
             Interaction::None => {
-                text.sections[0].value = "Button".to_string();
                 *color = NORMAL_BUTTON.into();
                 border_color.0 = Color::BLACK;
             }

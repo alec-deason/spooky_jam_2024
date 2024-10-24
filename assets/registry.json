@@ -31,6 +31,37 @@
       "type": "array",
       "typeInfo": "Tuple"
     },
+    "(glam::Vec3, spooky_jam::block::AnchorColor, spooky_jam::block::AnchorState, bool)": {
+      "isComponent": false,
+      "isResource": false,
+      "items": false,
+      "long_name": "(glam::Vec3, spooky_jam::block::AnchorColor, spooky_jam::block::AnchorState, bool)",
+      "prefixItems": [
+        {
+          "type": {
+            "$ref": "#/$defs/glam::Vec3"
+          }
+        },
+        {
+          "type": {
+            "$ref": "#/$defs/spooky_jam::block::AnchorColor"
+          }
+        },
+        {
+          "type": {
+            "$ref": "#/$defs/spooky_jam::block::AnchorState"
+          }
+        },
+        {
+          "type": {
+            "$ref": "#/$defs/bool"
+          }
+        }
+      ],
+      "short_name": "(Vec3, AnchorColor, AnchorState, bool)",
+      "type": "array",
+      "typeInfo": "Tuple"
+    },
     "(u8, u8)": {
       "isComponent": false,
       "isResource": false,
@@ -78,6 +109,19 @@
       },
       "long_name": "alloc::vec::Vec<(bevy_ecs::entity::Entity, bevy_picking_core::backend::HitData)>",
       "short_name": "Vec<(Entity, HitData)>",
+      "type": "array",
+      "typeInfo": "List"
+    },
+    "alloc::vec::Vec<(glam::Vec3, spooky_jam::block::AnchorColor, spooky_jam::block::AnchorState, bool)>": {
+      "isComponent": false,
+      "isResource": false,
+      "items": {
+        "type": {
+          "$ref": "#/$defs/(glam::Vec3, spooky_jam::block::AnchorColor, spooky_jam::block::AnchorState, bool)"
+        }
+      },
+      "long_name": "alloc::vec::Vec<(glam::Vec3, spooky_jam::block::AnchorColor, spooky_jam::block::AnchorState, bool)>",
+      "short_name": "Vec<(Vec3, AnchorColor, AnchorState, bool)>",
       "type": "array",
       "typeInfo": "List"
     },
@@ -1155,6 +1199,82 @@
       "type": "object",
       "typeInfo": "Enum"
     },
+    "bevy_asset::handle::Handle<bevy_kira_audio::instance::AudioInstance>": {
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "bevy_asset::handle::Handle<bevy_kira_audio::instance::AudioInstance>",
+      "oneOf": [
+        {
+          "items": false,
+          "long_name": "Strong",
+          "prefixItems": [
+            {
+              "type": {
+                "$ref": "#/$defs/std::sync::Arc<bevy_asset::handle::StrongHandle>"
+              }
+            }
+          ],
+          "short_name": "Strong",
+          "type": "array",
+          "typeInfo": "Tuple"
+        },
+        {
+          "items": false,
+          "long_name": "Weak",
+          "prefixItems": [
+            {
+              "type": {
+                "$ref": "#/$defs/bevy_asset::id::AssetId<bevy_kira_audio::instance::AudioInstance>"
+              }
+            }
+          ],
+          "short_name": "Weak",
+          "type": "array",
+          "typeInfo": "Tuple"
+        }
+      ],
+      "short_name": "Handle<AudioInstance>",
+      "type": "object",
+      "typeInfo": "Enum"
+    },
+    "bevy_asset::handle::Handle<bevy_kira_audio::source::AudioSource>": {
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "bevy_asset::handle::Handle<bevy_kira_audio::source::AudioSource>",
+      "oneOf": [
+        {
+          "items": false,
+          "long_name": "Strong",
+          "prefixItems": [
+            {
+              "type": {
+                "$ref": "#/$defs/std::sync::Arc<bevy_asset::handle::StrongHandle>"
+              }
+            }
+          ],
+          "short_name": "Strong",
+          "type": "array",
+          "typeInfo": "Tuple"
+        },
+        {
+          "items": false,
+          "long_name": "Weak",
+          "prefixItems": [
+            {
+              "type": {
+                "$ref": "#/$defs/bevy_asset::id::AssetId<bevy_kira_audio::source::AudioSource>"
+              }
+            }
+          ],
+          "short_name": "Weak",
+          "type": "array",
+          "typeInfo": "Tuple"
+        }
+      ],
+      "short_name": "Handle<AudioSource>",
+      "type": "object",
+      "typeInfo": "Enum"
+    },
     "bevy_asset::handle::Handle<bevy_pbr::pbr_material::StandardMaterial>": {
       "isComponent": true,
       "isResource": false,
@@ -2160,6 +2280,98 @@
         }
       ],
       "short_name": "AssetId<GltfPrimitive>",
+      "type": "object",
+      "typeInfo": "Enum"
+    },
+    "bevy_asset::id::AssetId<bevy_kira_audio::instance::AudioInstance>": {
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "bevy_asset::id::AssetId<bevy_kira_audio::instance::AudioInstance>",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "long_name": "Index",
+          "properties": {
+            "index": {
+              "long_name": "index",
+              "type": {
+                "$ref": "#/$defs/bevy_asset::assets::AssetIndex"
+              }
+            }
+          },
+          "required": [
+            "index"
+          ],
+          "short_name": "Index",
+          "type": "object",
+          "typeInfo": "Struct"
+        },
+        {
+          "additionalProperties": false,
+          "long_name": "Uuid",
+          "properties": {
+            "uuid": {
+              "long_name": "uuid",
+              "type": {
+                "$ref": "#/$defs/uuid::Uuid"
+              }
+            }
+          },
+          "required": [
+            "uuid"
+          ],
+          "short_name": "Uuid",
+          "type": "object",
+          "typeInfo": "Struct"
+        }
+      ],
+      "short_name": "AssetId<AudioInstance>",
+      "type": "object",
+      "typeInfo": "Enum"
+    },
+    "bevy_asset::id::AssetId<bevy_kira_audio::source::AudioSource>": {
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "bevy_asset::id::AssetId<bevy_kira_audio::source::AudioSource>",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "long_name": "Index",
+          "properties": {
+            "index": {
+              "long_name": "index",
+              "type": {
+                "$ref": "#/$defs/bevy_asset::assets::AssetIndex"
+              }
+            }
+          },
+          "required": [
+            "index"
+          ],
+          "short_name": "Index",
+          "type": "object",
+          "typeInfo": "Struct"
+        },
+        {
+          "additionalProperties": false,
+          "long_name": "Uuid",
+          "properties": {
+            "uuid": {
+              "long_name": "uuid",
+              "type": {
+                "$ref": "#/$defs/uuid::Uuid"
+              }
+            }
+          },
+          "required": [
+            "uuid"
+          ],
+          "short_name": "Uuid",
+          "type": "object",
+          "typeInfo": "Struct"
+        }
+      ],
+      "short_name": "AssetId<AudioSource>",
       "type": "object",
       "typeInfo": "Enum"
     },
@@ -3804,6 +4016,30 @@
       "short_name": "Entity",
       "type": "object",
       "typeInfo": "Value"
+    },
+    "bevy_egui::EguiSettings": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "bevy_egui::EguiSettings",
+      "properties": {
+        "default_open_url_target": {
+          "type": {
+            "$ref": "#/$defs/core::option::Option<alloc::string::String>"
+          }
+        },
+        "scale_factor": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        }
+      },
+      "required": [
+        "scale_factor"
+      ],
+      "short_name": "EguiSettings",
+      "type": "object",
+      "typeInfo": "Struct"
     },
     "bevy_gizmos::aabb::AabbGizmoConfigGroup": {
       "additionalProperties": false,
@@ -14583,6 +14819,30 @@
       "type": "object",
       "typeInfo": "Value"
     },
+    "core::ops::Range<f64>": {
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "core::ops::Range<f64>",
+      "short_name": "Range<f64>",
+      "type": "object",
+      "typeInfo": "Value"
+    },
+    "core::ops::RangeInclusive<f32>": {
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "core::ops::RangeInclusive<f32>",
+      "short_name": "RangeInclusive<f32>",
+      "type": "object",
+      "typeInfo": "Value"
+    },
+    "core::ops::RangeInclusive<f64>": {
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "core::ops::RangeInclusive<f64>",
+      "short_name": "RangeInclusive<f64>",
+      "type": "object",
+      "typeInfo": "Value"
+    },
     "core::option::Option<(u8, u8)>": {
       "isComponent": false,
       "isResource": false,
@@ -15378,6 +15638,295 @@
       "type": "object",
       "typeInfo": "Struct"
     },
+    "glam::BVec2": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "glam::BVec2",
+      "properties": {
+        "x": {
+          "type": {
+            "$ref": "#/$defs/bool"
+          }
+        },
+        "y": {
+          "type": {
+            "$ref": "#/$defs/bool"
+          }
+        }
+      },
+      "required": [
+        "x",
+        "y"
+      ],
+      "short_name": "BVec2",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "glam::BVec3": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "glam::BVec3",
+      "properties": {
+        "x": {
+          "type": {
+            "$ref": "#/$defs/bool"
+          }
+        },
+        "y": {
+          "type": {
+            "$ref": "#/$defs/bool"
+          }
+        },
+        "z": {
+          "type": {
+            "$ref": "#/$defs/bool"
+          }
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "z"
+      ],
+      "short_name": "BVec3",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "glam::BVec3A": {
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "glam::BVec3A",
+      "short_name": "BVec3A",
+      "type": "object",
+      "typeInfo": "Value"
+    },
+    "glam::BVec4": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "glam::BVec4",
+      "properties": {
+        "w": {
+          "type": {
+            "$ref": "#/$defs/bool"
+          }
+        },
+        "x": {
+          "type": {
+            "$ref": "#/$defs/bool"
+          }
+        },
+        "y": {
+          "type": {
+            "$ref": "#/$defs/bool"
+          }
+        },
+        "z": {
+          "type": {
+            "$ref": "#/$defs/bool"
+          }
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "z",
+        "w"
+      ],
+      "short_name": "BVec4",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "glam::BVec4A": {
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "glam::BVec4A",
+      "short_name": "BVec4A",
+      "type": "object",
+      "typeInfo": "Value"
+    },
+    "glam::DAffine2": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "glam::DAffine2",
+      "properties": {
+        "matrix2": {
+          "type": {
+            "$ref": "#/$defs/glam::DMat2"
+          }
+        },
+        "translation": {
+          "type": {
+            "$ref": "#/$defs/glam::DVec2"
+          }
+        }
+      },
+      "required": [
+        "matrix2",
+        "translation"
+      ],
+      "short_name": "DAffine2",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "glam::DAffine3": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "glam::DAffine3",
+      "properties": {
+        "matrix3": {
+          "type": {
+            "$ref": "#/$defs/glam::DMat3"
+          }
+        },
+        "translation": {
+          "type": {
+            "$ref": "#/$defs/glam::DVec3"
+          }
+        }
+      },
+      "required": [
+        "matrix3",
+        "translation"
+      ],
+      "short_name": "DAffine3",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "glam::DMat2": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "glam::DMat2",
+      "properties": {
+        "x_axis": {
+          "type": {
+            "$ref": "#/$defs/glam::DVec2"
+          }
+        },
+        "y_axis": {
+          "type": {
+            "$ref": "#/$defs/glam::DVec2"
+          }
+        }
+      },
+      "required": [
+        "x_axis",
+        "y_axis"
+      ],
+      "short_name": "DMat2",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "glam::DMat3": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "glam::DMat3",
+      "properties": {
+        "x_axis": {
+          "type": {
+            "$ref": "#/$defs/glam::DVec3"
+          }
+        },
+        "y_axis": {
+          "type": {
+            "$ref": "#/$defs/glam::DVec3"
+          }
+        },
+        "z_axis": {
+          "type": {
+            "$ref": "#/$defs/glam::DVec3"
+          }
+        }
+      },
+      "required": [
+        "x_axis",
+        "y_axis",
+        "z_axis"
+      ],
+      "short_name": "DMat3",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "glam::DMat4": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "glam::DMat4",
+      "properties": {
+        "w_axis": {
+          "type": {
+            "$ref": "#/$defs/glam::DVec4"
+          }
+        },
+        "x_axis": {
+          "type": {
+            "$ref": "#/$defs/glam::DVec4"
+          }
+        },
+        "y_axis": {
+          "type": {
+            "$ref": "#/$defs/glam::DVec4"
+          }
+        },
+        "z_axis": {
+          "type": {
+            "$ref": "#/$defs/glam::DVec4"
+          }
+        }
+      },
+      "required": [
+        "x_axis",
+        "y_axis",
+        "z_axis",
+        "w_axis"
+      ],
+      "short_name": "DMat4",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "glam::DQuat": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "glam::DQuat",
+      "properties": {
+        "w": {
+          "type": {
+            "$ref": "#/$defs/f64"
+          }
+        },
+        "x": {
+          "type": {
+            "$ref": "#/$defs/f64"
+          }
+        },
+        "y": {
+          "type": {
+            "$ref": "#/$defs/f64"
+          }
+        },
+        "z": {
+          "type": {
+            "$ref": "#/$defs/f64"
+          }
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "z",
+        "w"
+      ],
+      "short_name": "DQuat",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
     "glam::DVec2": {
       "additionalProperties": false,
       "isComponent": false,
@@ -15400,6 +15949,74 @@
         "y"
       ],
       "short_name": "DVec2",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "glam::DVec3": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "glam::DVec3",
+      "properties": {
+        "x": {
+          "type": {
+            "$ref": "#/$defs/f64"
+          }
+        },
+        "y": {
+          "type": {
+            "$ref": "#/$defs/f64"
+          }
+        },
+        "z": {
+          "type": {
+            "$ref": "#/$defs/f64"
+          }
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "z"
+      ],
+      "short_name": "DVec3",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "glam::DVec4": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "glam::DVec4",
+      "properties": {
+        "w": {
+          "type": {
+            "$ref": "#/$defs/f64"
+          }
+        },
+        "x": {
+          "type": {
+            "$ref": "#/$defs/f64"
+          }
+        },
+        "y": {
+          "type": {
+            "$ref": "#/$defs/f64"
+          }
+        },
+        "z": {
+          "type": {
+            "$ref": "#/$defs/f64"
+          }
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "z",
+        "w"
+      ],
+      "short_name": "DVec4",
       "type": "object",
       "typeInfo": "Struct"
     },
@@ -15428,6 +16045,74 @@
       "type": "object",
       "typeInfo": "Struct"
     },
+    "glam::IVec3": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "glam::IVec3",
+      "properties": {
+        "x": {
+          "type": {
+            "$ref": "#/$defs/i32"
+          }
+        },
+        "y": {
+          "type": {
+            "$ref": "#/$defs/i32"
+          }
+        },
+        "z": {
+          "type": {
+            "$ref": "#/$defs/i32"
+          }
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "z"
+      ],
+      "short_name": "IVec3",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "glam::IVec4": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "glam::IVec4",
+      "properties": {
+        "w": {
+          "type": {
+            "$ref": "#/$defs/i32"
+          }
+        },
+        "x": {
+          "type": {
+            "$ref": "#/$defs/i32"
+          }
+        },
+        "y": {
+          "type": {
+            "$ref": "#/$defs/i32"
+          }
+        },
+        "z": {
+          "type": {
+            "$ref": "#/$defs/i32"
+          }
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "z",
+        "w"
+      ],
+      "short_name": "IVec4",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
     "glam::Mat2": {
       "additionalProperties": false,
       "isComponent": false,
@@ -15450,6 +16135,37 @@
         "y_axis"
       ],
       "short_name": "Mat2",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "glam::Mat3": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "glam::Mat3",
+      "properties": {
+        "x_axis": {
+          "type": {
+            "$ref": "#/$defs/glam::Vec3"
+          }
+        },
+        "y_axis": {
+          "type": {
+            "$ref": "#/$defs/glam::Vec3"
+          }
+        },
+        "z_axis": {
+          "type": {
+            "$ref": "#/$defs/glam::Vec3"
+          }
+        }
+      },
+      "required": [
+        "x_axis",
+        "y_axis",
+        "z_axis"
+      ],
+      "short_name": "Mat3",
       "type": "object",
       "typeInfo": "Struct"
     },
@@ -15611,6 +16327,43 @@
         "z"
       ],
       "short_name": "UVec3",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "glam::UVec4": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "glam::UVec4",
+      "properties": {
+        "w": {
+          "type": {
+            "$ref": "#/$defs/u32"
+          }
+        },
+        "x": {
+          "type": {
+            "$ref": "#/$defs/u32"
+          }
+        },
+        "y": {
+          "type": {
+            "$ref": "#/$defs/u32"
+          }
+        },
+        "z": {
+          "type": {
+            "$ref": "#/$defs/u32"
+          }
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "z",
+        "w"
+      ],
+      "short_name": "UVec4",
       "type": "object",
       "typeInfo": "Struct"
     },
@@ -15907,6 +16660,63 @@
       "type": "string",
       "typeInfo": "Enum"
     },
+    "spooky_jam::block::AnchorState": {
+      "isComponent": false,
+      "isResource": false,
+      "long_name": "spooky_jam::block::AnchorState",
+      "oneOf": [
+        {
+          "long_name": "Clear"
+        },
+        {
+          "items": false,
+          "long_name": "Occupied",
+          "prefixItems": [
+            {
+              "type": {
+                "$ref": "#/$defs/bevy_ecs::entity::Entity"
+              }
+            }
+          ],
+          "short_name": "Occupied",
+          "type": "array",
+          "typeInfo": "Tuple"
+        },
+        {
+          "items": false,
+          "long_name": "Blocked",
+          "prefixItems": [
+            {
+              "type": {
+                "$ref": "#/$defs/bevy_ecs::entity::Entity"
+              }
+            }
+          ],
+          "short_name": "Blocked",
+          "type": "array",
+          "typeInfo": "Tuple"
+        }
+      ],
+      "short_name": "AnchorState",
+      "type": "object",
+      "typeInfo": "Enum"
+    },
+    "spooky_jam::block::Anchors": {
+      "isComponent": true,
+      "isResource": false,
+      "items": false,
+      "long_name": "spooky_jam::block::Anchors",
+      "prefixItems": [
+        {
+          "type": {
+            "$ref": "#/$defs/alloc::vec::Vec<(glam::Vec3, spooky_jam::block::AnchorColor, spooky_jam::block::AnchorState, bool)>"
+          }
+        }
+      ],
+      "short_name": "Anchors",
+      "type": "array",
+      "typeInfo": "TupleStruct"
+    },
     "spooky_jam::block::Block": {
       "additionalProperties": false,
       "isComponent": true,
@@ -15915,6 +16725,17 @@
       "properties": {},
       "required": [],
       "short_name": "Block",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "spooky_jam::block::Conductor": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "spooky_jam::block::Conductor",
+      "properties": {},
+      "required": [],
+      "short_name": "Conductor",
       "type": "object",
       "typeInfo": "Struct"
     },
@@ -15944,6 +16765,17 @@
       "short_name": "DisasterTarget",
       "type": "string",
       "typeInfo": "Enum"
+    },
+    "spooky_jam::block::FoundationAnchor": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "spooky_jam::block::FoundationAnchor",
+      "properties": {},
+      "required": [],
+      "short_name": "FoundationAnchor",
+      "type": "object",
+      "typeInfo": "Struct"
     },
     "spooky_jam::block::MouseAnchor": {
       "additionalProperties": false,
@@ -15989,6 +16821,17 @@
       "type": "object",
       "typeInfo": "Struct"
     },
+    "spooky_jam::decay_phase::DarkFigureBody": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "spooky_jam::decay_phase::DarkFigureBody",
+      "properties": {},
+      "required": [],
+      "short_name": "DarkFigureBody",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
     "spooky_jam::decay_phase::Disaster": {
       "isComponent": true,
       "isResource": false,
@@ -16001,14 +16844,25 @@
       "type": "string",
       "typeInfo": "Enum"
     },
-    "spooky_jam::decay_phase::DisasterSpawner": {
+    "spooky_jam::decay_phase::Eye": {
       "additionalProperties": false,
       "isComponent": true,
       "isResource": false,
-      "long_name": "spooky_jam::decay_phase::DisasterSpawner",
+      "long_name": "spooky_jam::decay_phase::Eye",
       "properties": {},
       "required": [],
-      "short_name": "DisasterSpawner",
+      "short_name": "Eye",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "spooky_jam::decay_phase::SkyTentacle": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "spooky_jam::decay_phase::SkyTentacle",
+      "properties": {},
+      "required": [],
+      "short_name": "SkyTentacle",
       "type": "object",
       "typeInfo": "Struct"
     },

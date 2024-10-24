@@ -6,11 +6,11 @@
 }
 
 const effect_color = vec3(1.0, 1.0, 0.8);
-const octave_count = 4u;
-const amp_start = 0.5;
-const amp_coeff = 0.15;
-const freq_coeff = 20.0;
-const speed = 5.0;
+const octave_count = 2u;
+const amp_start = 0.25;
+const amp_coeff = 0.25;
+const freq_coeff = 200.0;
+const speed = 8.0;
 
 fn hash12(x: vec2<f32>) -> f32 {
     return fract(cos(dot(x, vec2(13.9898, 8.141)) % 3.14) * 43758.5453);
@@ -64,18 +64,7 @@ struct LineMaterial {
 fn fragment(
     in: VertexOutput,
 ) -> @location(0) vec4<f32> {
-    //let viewport_uv = coords_to_viewport_uv(in.position.xy, view.viewport);
-/*
-    var uv = 2.0 * in.uv- 1.0;
-    uv.y += 1.0;
-    uv *= 10.0;
-    uv += 2.0 * fbm(uv + globals.time * speed, octave_count) - 1.0;
-    let dist = abs(uv.x);
-    let color = effect_color * mix(0.0, 0.05, hash12(vec2(globals.time))) / dist;
-
-    return vec4(color, color.r);
-*/
-    var uv = in.world_position.xy;
+    var uv = in.world_position.xy + vec2(0.5, 0.5);
     uv += 2.0 * fbm(uv + globals.time * speed, octave_count) - 1.0;
     var d = 100.0;
     let p_count = material.point_count - 1;
@@ -83,12 +72,8 @@ fn fragment(
         let dd = sdSegment(uv, material.points[i].xy, material.points[i+1].xy);
         d = min(d, dd);
     }
-    var c = vec4(0.0);
-    if d < 0.04 {
-        c = vec4(1.0);
-    }
+    d *= 1.5;
     let color = effect_color * mix(0.0, 0.05, hash12(vec2(globals.time))) / d;
     let a = 1.0 - d*2.0;
     return vec4(color, a);
-    //return material.color;
 }

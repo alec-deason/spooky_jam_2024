@@ -32,7 +32,7 @@ impl Sky {
         let color = self.current_color(now);
         *self = Sky::Transition {
             start_color: color,
-            end_color: Color::srgba(0.102, 0.101, 0.112, 1.0),
+            end_color: Color::srgba(0.052, 0.051, 0.062, 1.0),
             start_time: now,
             end_time: now + std::time::Duration::from_secs(2),
             start_star_brightness: self.current_star_brightness(now),
@@ -106,7 +106,7 @@ fn sky_color_animation(
     for (mut sky_state, material_handle) in &mut query {
         if let Some(material) = materials.get_mut(material_handle) {
             match &*sky_state {
-                Sky::Color(color, _) => material.emissive= (*color).into(),
+                Sky::Color(color, _) => material.emissive = (*color).into(),
                 Sky::Transition { end_color, end_time, end_star_brightness, .. } => {
                     let now = time.elapsed();
                     if *end_time <= now {

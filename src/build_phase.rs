@@ -1,13 +1,15 @@
 use bevy::{
     prelude::*,
+    core_pipeline::tonemapping::Tonemapping,
 };
 use blenvy::{
     BlueprintAnimationPlayerLink, BlueprintAnimations, BlueprintInfo, GameWorldTag,
     HideUntilReady, SpawnBlueprint,
 };
 use bevy_mod_picking::prelude::*;
+use bevy_kira_audio::prelude::*;
 
-use crate::{SNAP_DISTANCE, CAMERA_SCALE, GameState, SavedPosition, Spawned, SpawnedFrom, Spawner, environmental_decoration::{Water, Sky}, MousePos, BLOCKS, block::{DecayedRepresentation, Block, AnchorState}, Lift};
+use crate::{CameraScale, SNAP_DISTANCE, GameState, SavedPosition, Spawned, SpawnedFrom, Spawner, environmental_decoration::{Water, Sky}, MousePos, BLOCKS, block::{DecayedRepresentation, Block, AnchorState}, Lift, block_pool::{BlockPoolResident, DecayedPoolResident}};
 
 #[derive(States, Debug, Clone, PartialEq, Eq, Hash)]
 enum PhasePhase {
@@ -79,6 +81,7 @@ impl Plugin for BuildPhasePlugin {
             .add_systems(Update, (start_retract, tentacle_retracting, tentacle_extending, tentacle_idle).run_if(in_state(crate::GameState::BuildPhase)))
 
             .add_systems(Update, (
+                play_squelch,
                 spawn_block,
                 follow_mouse,
                 start_drag,
@@ -86,7 +89,7 @@ impl Plugin for BuildPhasePlugin {
                 update_tentacle_spawners,
             ).run_if(in_state(crate::GameState::BuildPhase)).run_if(in_state(PhasePhase::Running)))
             .add_systems(PostUpdate, (check_completion.run_if(in_state(PhasePhase::Running)), blocks_track_spawners).run_if(in_state(crate::GameState::BuildPhase)))
-            .add_systems(OnEnter(crate::GameState::BuildPhase), setup)
+            .add_systems(OnEnter(crate::GameState::Loading), setup)
             .add_systems(OnEnter(crate::GameState::BuildPhase), |mut next_state: ResMut<NextState<PhasePhase>>| { next_state.set(PhasePhase::Running) })
 
             .add_systems(OnEnter(PhasePhase::ShuttingDown), retract_tentacles)
@@ -101,8 +104,9 @@ fn setup(mut commands: Commands) {
         Camera3dBundle {
             transform: Transform::from_xyz(0.0, 0.0, 10.0)
                 .looking_at(Vec3::new(0.0, 0.0, 0.0), Vec3::Y),
+            tonemapping: Tonemapping::Reinhard,
             projection: OrthographicProjection {
-                scale: CAMERA_SCALE,
+                scale: 0.05,
                 ..default()
             }.into(),
             ..default()
@@ -134,30 +138,51 @@ fn spawn_block(
     mut commands: Commands,
     tentacles: Query<&TentacleSpawner, With<Extending>>,
     spawn_points: Query<Entity, (With<Spawner>, Without<Spawned>)>,
+    block_pool: Query<(Entity, &BlockPoolResident)>,
+    audio: Res<Audio>,
+    splashes: Res<crate::music::Splashes>,
+    mut count: Local<usize>,
 ) {
     for tentacle_spawner in &tentacles {
         if let Ok(spawner_entity) = spawn_points.get(tentacle_spawner.0) {
             let path = &BLOCKS[fastrand::usize(0..BLOCKS.len())];
-            let mut transform = Transform::default();
-            if path.contains("reversable") && fastrand::f32() > 0.5 {
-                transform = transform.with_scale(Vec3::new(-1.0, 1.0, 1.0));
-            };
-            let block_entity = commands.spawn((
-                BlueprintInfo::from_path(path),
-                transform,
-                SpawnBlueprint,
-                HideUntilReady,
-                GameWorldTag,
-                OnTentacle,
-                Block,
-                SpawnedFrom(spawner_entity),
-                Lift::<DecayedRepresentation>::default(),
-                PickableBundle::default(),
-                On::<Pointer<DragStart>>::listener_insert(AwaitingPlacement),
-                On::<Pointer<DragEnd>>::listener_remove::<AwaitingPlacement>(),
-            )).id();
-            commands.entity(spawner_entity).insert(Spawned(block_entity));
+            let mut found = None;
+            for (entity, resident) in &block_pool {
+                if &resident.0 == path {
+                    found = Some(entity);
+                    break;
+                }
+            }
+            if let Some(entity) = found {
+                if *count >= 4 {
+                    audio.play(splashes.0[fastrand::usize(0..splashes.0.len())].clone()).with_volume(0.25);
+                }
+                *count += 1;
+                commands.entity(entity).insert((
+                    OnTentacle,
+                    Block,
+                    Visibility::Visible,
+                    SpawnedFrom(spawner_entity),
+                    Lift::<DecayedRepresentation>::default(),
+                    PickableBundle::default(),
+                    On::<Pointer<DragStart>>::listener_insert(AwaitingPlacement),
+                    On::<Pointer<DragEnd>>::listener_remove::<AwaitingPlacement>(),
+                )).remove::<BlockPoolResident>();
+                commands.entity(spawner_entity).insert(Spawned(entity));
+                return;
+            }
         }
+    }
+}
+
+fn play_squelch(
+    mut commands: Commands,
+    squelches: Res<crate::music::Squelches>,
+    query: Query<Entity, Added<AwaitingPlacement>>,
+    audio: Res<Audio>,
+) {
+    for _ in &query {
+        audio.play(squelches.0[fastrand::usize(0..squelches.0.len())].clone());
     }
 }
 
@@ -210,9 +235,14 @@ fn start_drag(mut commands: Commands, mut query: Query<(Entity, &mut Transform),
 
 fn follow_mouse(
     mut commands: Commands,
+    already_snapped: Query<Entity, With<Snapped>>,
     mut query: Query<(Entity, &mut Transform, &crate::block::Anchors, Option<&crate::block::InCollision>), With<AwaitingPlacement>>,
     mouse_pos: Res<MousePos>,
-    others: Query<(Entity, &Transform, &crate::block::Anchors), (Without<AwaitingPlacement>, Without<OnTentacle>)>)
+    others: Query<(Entity, &Transform, &crate::block::Anchors), (Without<AwaitingPlacement>, Without<OnTentacle>)>,
+    camera_scale: Res<CameraScale>,
+    clanks: Res<crate::music::Clanks>,
+    audio: Res<Audio>,
+)
         {
     for (entity, mut transform, anchors, in_collision) in &mut query {
         let mut snapped = None;
@@ -225,19 +255,19 @@ fn follow_mouse(
         let mut min_distance = std::f32::INFINITY;
         if in_collision.is_none() {
             for (other_entity, other_transform, other_anchors) in &others {
-                for (a_anchor, (anchor, color, anchor_state)) in anchors.0.iter().enumerate() {
+                for (a_anchor, (anchor, color, anchor_state, _)) in anchors.0.iter().enumerate() {
                     if !(matches!(anchor_state, AnchorState::Clear) || matches!(anchor_state, AnchorState::Blocked(e) if *e == other_entity)) {
                         snap_dirty = true;
                         continue
                     }
-                    for (b_anchor, (other_anchor, other_color, other_anchor_state)) in other_anchors.0.iter().enumerate() {
+                    for (b_anchor, (other_anchor, other_color, other_anchor_state, _)) in other_anchors.0.iter().enumerate() {
                         if !(matches!(other_anchor_state, AnchorState::Clear) || matches!(other_anchor_state, AnchorState::Blocked(e) if *e == entity)) || !color.compatible(*other_color) {
                             snap_dirty = true;
                             continue
                         }
                         let d = (maybe_pos + *anchor)-(other_transform.translation + *other_anchor);
                         let dist = d.length();
-                        if dist < SNAP_DISTANCE*CAMERA_SCALE {
+                        if dist < SNAP_DISTANCE*camera_scale.0 {
                             if dist < min_distance {
                                 min_distance = dist;
                                 maybe_pos.x = mouse_pos.0.x - d.x;
@@ -262,6 +292,9 @@ fn follow_mouse(
 
         if snap_dirty {
             if let Some(snapped) = snapped {
+                if !already_snapped.contains(entity) {
+                    audio.play(clanks.0[fastrand::usize(0..clanks.0.len())].clone());
+                }
                 commands.entity(entity).insert(snapped);
             } else {
                 commands.entity(entity).remove::<Snapped>();
@@ -358,7 +391,7 @@ fn update_tentacle_spawners(mut commands: Commands, query: Query<Entity, (With<T
 
 fn check_completion(
     in_drag: Query<Entity, With<AwaitingPlacement>>,
-    query: Query<&crate::block::Anchors, Without<OnTentacle>>,
+    query: Query<(Entity, &crate::block::Anchors), (Without<OnTentacle>, Without<DecayedPoolResident>, Without<BlockPoolResident>)>,
     mut sky: Query<&mut Sky>,
     time: Res<Time>,
     mut next_state: ResMut<NextState<PhasePhase>>,
@@ -370,16 +403,19 @@ fn check_completion(
         return
     }
 
+    let mut any_non_foundation = false;
     let mut done = None;
-    'outer: for anchors in &query {
-        for (_, color, anchor_state) in &anchors.0 {
-            if *color == crate::block::AnchorColor::Up {
-                if done.is_none() {
-                    done = Some(true);
-                }
-                if *anchor_state == AnchorState::Clear {
-                    done = Some(false);
-                    break 'outer;
+    for (entity, anchors) in &query {
+        for (_, color, anchor_state, is_foundation) in &anchors.0 {
+            if !is_foundation {
+                any_non_foundation = true;
+                if *color == crate::block::AnchorColor::Up {
+                    if done.is_none() {
+                        done = Some(true);
+                    }
+                    if *anchor_state == AnchorState::Clear {
+                        done = Some(false);
+                    }
                 }
             }
         }
@@ -389,7 +425,7 @@ fn check_completion(
         done = Some(true);
     }
 
-    if done.unwrap_or(false) {
+    if any_non_foundation && done.unwrap_or(false) {
         if delay.elapsed() > std::time::Duration::from_millis(250) {
             for mut sky in &mut sky {
                 sky.to_night(time.elapsed());

@@ -5,7 +5,7 @@ use bevy::{
 };
 use bevy_mod_picking::prelude::*;
 
-use crate::lift_component;
+use crate::{BLOCKS, DECAYED, lift_component, block_pool::BlockPool};
 
 #[derive(Component, Reflect)]
 #[reflect(Component)]
@@ -16,6 +16,14 @@ pub struct Block;
 pub enum DisasterTarget {
     All
 }
+
+#[derive(Component, Reflect)]
+#[reflect(Component)]
+pub struct Conductor;
+
+#[derive(Component, Reflect)]
+#[reflect(Component)]
+pub struct FoundationAnchor;
 
 #[derive(Copy, Clone, Debug, Component, Reflect, PartialEq)]
 pub enum AnchorColor {
@@ -49,9 +57,9 @@ pub enum AnchorState {
     Blocked(Entity),
 }
 
-#[derive(Component, Reflect)]
+#[derive(Component, Reflect, Debug)]
 #[reflect(Component)]
-pub struct Anchors(pub Vec<(Vec3, AnchorColor, AnchorState)>);
+pub struct Anchors(pub Vec<(Vec3, AnchorColor, AnchorState, bool)>);
 
 #[derive(Component, Reflect)]
 #[reflect(Component)]
@@ -76,6 +84,9 @@ impl Plugin for BlockPlugin {
     fn build(&self, app: &mut App) {
         app
             .register_type::<Anchor>()
+            .register_type::<FoundationAnchor>()
+            .register_type::<Anchors>()
+            .register_type::<Conductor>()
             .register_type::<AnchorColor>()
             .register_type::<DecayedRepresentation>()
             .register_type::<DisasterTarget>()
@@ -91,20 +102,30 @@ impl Plugin for BlockPlugin {
     }
 }
 
-fn configure_anchors(mut commands: Commands, anchors: Query<(Entity, &Transform, &Anchor)>, parent_query: Query<&Parent>, mut composite_anchors: Query<(Option<&mut Anchors>, &Transform)>) {
-    for (base_entity, base_transform, anchor) in &anchors {
+fn configure_anchors(
+    mut commands: Commands,
+    anchors: Query<(Entity, &Transform, &Anchor, Option<&FoundationAnchor>)>,
+    parent_query: Query<&Parent>,
+    pool: Query<Entity, With<BlockPool>>,
+    mut composite_anchors: Query<(Option<&mut Anchors>, &Transform)>
+) {
+    let mut to_insert = HashMap::new();
+    for (base_entity, base_transform, anchor, foundation) in &anchors {
         commands.entity(base_entity).remove::<Anchor>();
-        let parent_entity = parent_query.iter_ancestors(base_entity).last().unwrap();
+        let parent_entity = parent_query.iter_ancestors(base_entity).filter(|e| !pool.contains(*e)).last().unwrap();
         if let Ok((maybe_anchors, parent_transform)) = composite_anchors.get_mut(parent_entity) {
             let translation = base_transform.translation * parent_transform.scale;
 
             if let Some(mut anchors) = maybe_anchors {
-                anchors.0.push((translation, anchor.0, AnchorState::Clear));
+                anchors.0.push((translation, anchor.0, AnchorState::Clear, foundation.is_some()));
             } else {
-                commands.entity(parent_entity).insert(Anchors(vec![(translation, anchor.0, AnchorState::Clear)]));
-                return;
+                to_insert.entry(parent_entity).or_insert(vec![]).push((translation, anchor.0, AnchorState::Clear, foundation.is_some()));
             }
         }
+    }
+
+    for (entity, anchors) in to_insert {
+        commands.entity(entity).insert(Anchors(anchors));
     }
 }
 
@@ -153,7 +174,7 @@ fn check_anchor_clearance(
     blocks: Query<(Entity, &GlobalTransform, &Collider)>,
 ) {
     for (anchor_entity, base_transform, mut anchors) in &mut anchors {
-        for (anchor_transform, anchor_color, ref mut anchor_state) in anchors.0.iter_mut() {
+        for (anchor_transform, anchor_color, ref mut anchor_state, _) in anchors.0.iter_mut() {
             if *anchor_color == AnchorColor::Up && matches!(anchor_state, AnchorState::Clear | AnchorState::Blocked(_)) {
                 *anchor_state = AnchorState::Clear;
                 let t_a = base_transform.translation() + *anchor_transform + Vec3::new(0.0, 1.0, 0.0);
