@@ -10,6 +10,10 @@ pub struct Block;
 
 #[derive(Component, Reflect)]
 #[reflect(Component)]
+pub struct WeirdMachine;
+
+#[derive(Component, Reflect)]
+#[reflect(Component)]
 pub enum DisasterTarget {
     All,
 }
@@ -88,6 +92,7 @@ impl Plugin for BlockPlugin {
             .register_type::<Anchors>()
             .register_type::<Conductor>()
             .register_type::<NoCollide>()
+            .register_type::<WeirdMachine>()
             .register_type::<AnchorColor>()
             .register_type::<DecayedRepresentation>()
             .register_type::<DisasterTarget>()
