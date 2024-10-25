@@ -1,13 +1,12 @@
 use std::time::Duration;
 
 use bevy::prelude::*;
-use bevy_kira_audio::prelude::{*, AudioSource};
+use bevy_kira_audio::prelude::{AudioSource, *};
 
-use crate::{CLANKS, SQUELCHES, SPLASHES};
+use crate::{CLANKS, SPLASHES, SQUELCHES};
 
 #[derive(Resource)]
 pub struct Music {
-    pub build_phase: Handle<AudioSource>,
     pub dark_figure_hit: Handle<AudioSource>,
     pub thunder: Handle<AudioSource>,
     pub spark: Handle<AudioSource>,
@@ -21,32 +20,23 @@ pub struct Squelches(pub Vec<Handle<AudioSource>>);
 #[derive(Resource)]
 pub struct Splashes(pub Vec<Handle<AudioSource>>);
 
-#[derive(Component)]
-pub struct FadeIn;
+#[derive(Resource)]
+struct Muted(bool);
 
 #[derive(Resource)]
 pub struct BackgroundMusic(pub Handle<AudioInstance>, pub Option<Handle<AudioInstance>>);
 
-#[derive(Component)]
-struct FadeOut;
-
-const FADE_TIME: f32 = 2.0;
-
 pub struct AudioPlugin;
 
 impl Plugin for AudioPlugin {
-     fn build(&self, app: &mut App) {
-         app
-             .add_systems(Startup, start_load)
-         ;
-     }
+    fn build(&self, app: &mut App) {
+        app.insert_resource(Muted(false))
+            .add_systems(Startup, start_load)
+            .add_systems(Update, toggle_mute);
+    }
 }
 
-fn start_load(
-    mut commands: Commands,
-    mut assets: ResMut<AssetServer>,
-    audio: Res<Audio>
-) {
+fn start_load(mut commands: Commands, assets: ResMut<AssetServer>, audio: Res<Audio>) {
     let mut clanks = Clanks(vec![]);
     for p in &CLANKS {
         clanks.0.push(assets.load::<AudioSource>(*p));
@@ -71,8 +61,33 @@ fn start_load(
     let scoring_overlay = assets.load::<AudioSource>("audio/harp_layer.ogg");
     let thunder = assets.load::<AudioSource>("audio/thunder.ogg");
     let spark = assets.load::<AudioSource>("audio/spark.ogg");
-    let id = audio.play(build_phase.clone()).looped().fade_in(AudioTween::new(Duration::from_secs(2), AudioEasing::OutPowi(2))).handle();
+    let id = audio
+        .play(build_phase.clone())
+        .looped()
+        .fade_in(AudioTween::new(
+            Duration::from_secs(2),
+            AudioEasing::OutPowi(2),
+        ))
+        .handle();
     commands.insert_resource(BackgroundMusic(id, None));
 
-    commands.insert_resource(Music { build_phase, dark_figure_hit, decay_overlay, scoring_overlay, thunder, spark });
+    commands.insert_resource(Music {
+        dark_figure_hit,
+        decay_overlay,
+        scoring_overlay,
+        thunder,
+        spark,
+    });
+}
+
+fn toggle_mute(audio: Res<Audio>, keyboard: Res<ButtonInput<KeyCode>>, mut muted: ResMut<Muted>) {
+    if keyboard.just_pressed(KeyCode::KeyM) {
+        if muted.0 {
+            audio.set_volume(1.0);
+            muted.0 = false;
+        } else {
+            audio.set_volume(0.0);
+            muted.0 = true;
+        }
+    }
 }

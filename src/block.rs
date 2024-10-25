@@ -1,11 +1,8 @@
-use std::collections::HashMap;
-use bevy::{
-    prelude::*,
-    render::primitives::Aabb,
-};
+use bevy::{prelude::*, render::primitives::Aabb};
 use bevy_mod_picking::prelude::*;
+use std::collections::HashMap;
 
-use crate::{BLOCKS, DECAYED, lift_component, block_pool::BlockPool};
+use crate::{block_pool::BlockPool, lift_component};
 
 #[derive(Component, Reflect)]
 #[reflect(Component)]
@@ -14,12 +11,16 @@ pub struct Block;
 #[derive(Component, Reflect)]
 #[reflect(Component)]
 pub enum DisasterTarget {
-    All
+    All,
 }
 
 #[derive(Component, Reflect)]
 #[reflect(Component)]
 pub struct Conductor;
+
+#[derive(Component, Reflect, Copy, Clone)]
+#[reflect(Component)]
+pub struct NoCollide;
 
 #[derive(Component, Reflect)]
 #[reflect(Component)]
@@ -73,7 +74,7 @@ pub struct DecayedRepresentation(pub String);
 struct Collider(Box<dyn parry3d::shape::Shape>);
 
 #[derive(Component)]
-pub struct InCollision(Vec<Entity>);
+pub struct InCollision;
 
 #[derive(Component)]
 struct ProcessedCollider;
@@ -82,11 +83,11 @@ pub struct BlockPlugin;
 
 impl Plugin for BlockPlugin {
     fn build(&self, app: &mut App) {
-        app
-            .register_type::<Anchor>()
+        app.register_type::<Anchor>()
             .register_type::<FoundationAnchor>()
             .register_type::<Anchors>()
             .register_type::<Conductor>()
+            .register_type::<NoCollide>()
             .register_type::<AnchorColor>()
             .register_type::<DecayedRepresentation>()
             .register_type::<DisasterTarget>()
@@ -97,7 +98,15 @@ impl Plugin for BlockPlugin {
             .register_type::<PickHighlight>()
             .register_type::<Block>()
             .add_systems(PreUpdate, test_colliders)
-            .add_systems(Update, (add_colliders, configure_anchors, lift_component::<DecayedRepresentation>))
+            .add_systems(
+                Update,
+                (
+                    add_colliders,
+                    configure_anchors,
+                    lift_component::<DecayedRepresentation>,
+                    lift_component::<NoCollide>,
+                ),
+            )
             .add_systems(PostUpdate, check_anchor_clearance);
     }
 }
@@ -107,19 +116,33 @@ fn configure_anchors(
     anchors: Query<(Entity, &Transform, &Anchor, Option<&FoundationAnchor>)>,
     parent_query: Query<&Parent>,
     pool: Query<Entity, With<BlockPool>>,
-    mut composite_anchors: Query<(Option<&mut Anchors>, &Transform)>
+    mut composite_anchors: Query<(Option<&mut Anchors>, &Transform)>,
 ) {
     let mut to_insert = HashMap::new();
     for (base_entity, base_transform, anchor, foundation) in &anchors {
         commands.entity(base_entity).remove::<Anchor>();
-        let parent_entity = parent_query.iter_ancestors(base_entity).filter(|e| !pool.contains(*e)).last().unwrap();
+        let parent_entity = parent_query
+            .iter_ancestors(base_entity)
+            .filter(|e| !pool.contains(*e))
+            .last()
+            .unwrap();
         if let Ok((maybe_anchors, parent_transform)) = composite_anchors.get_mut(parent_entity) {
             let translation = base_transform.translation * parent_transform.scale;
 
             if let Some(mut anchors) = maybe_anchors {
-                anchors.0.push((translation, anchor.0, AnchorState::Clear, foundation.is_some()));
+                anchors.0.push((
+                    translation,
+                    anchor.0,
+                    AnchorState::Clear,
+                    foundation.is_some(),
+                ));
             } else {
-                to_insert.entry(parent_entity).or_insert(vec![]).push((translation, anchor.0, AnchorState::Clear, foundation.is_some()));
+                to_insert.entry(parent_entity).or_insert(vec![]).push((
+                    translation,
+                    anchor.0,
+                    AnchorState::Clear,
+                    foundation.is_some(),
+                ));
             }
         }
     }
@@ -131,21 +154,35 @@ fn configure_anchors(
 
 fn add_colliders(
     mut commands: Commands,
-    query: Query<(Entity, &Aabb), (With<crate::block::Block>, Without<ProcessedCollider>)>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
+    query: Query<
+        (Entity, &Aabb),
+        (
+            With<crate::block::Block>,
+            Without<ProcessedCollider>,
+            Without<NoCollide>,
+        ),
+    >,
 ) {
     for (entity, aabb) in &query {
-        commands.entity(entity).insert(ProcessedCollider).insert(Collider(Box::new(parry3d::shape::Cuboid { half_extents: [aabb.half_extents.x * 0.9, aabb.half_extents.y * 0.9, aabb.half_extents.z * 0.9].into() })));
+        commands
+            .entity(entity)
+            .insert(ProcessedCollider)
+            .insert(Collider(Box::new(parry3d::shape::Cuboid {
+                half_extents: [
+                    aabb.half_extents.x * 0.9,
+                    aabb.half_extents.y * 0.9,
+                    aabb.half_extents.z * 0.9,
+                ]
+                .into(),
+            })));
     }
 }
 
-fn test_colliders(
-    mut commands: Commands,
-    query: Query<(Entity, &GlobalTransform, &Collider)>,
-) {
-    let mut collisions:HashMap<Entity, Vec<Entity>> = HashMap::new();
-    for [(entity_a, transform_a, collider_a), (entity_b, transform_b, collider_b)] in query.iter_combinations() {
+fn test_colliders(mut commands: Commands, query: Query<(Entity, &GlobalTransform, &Collider)>) {
+    let mut collisions: HashMap<Entity, Vec<Entity>> = HashMap::new();
+    for [(entity_a, transform_a, collider_a), (entity_b, transform_b, collider_b)] in
+        query.iter_combinations()
+    {
         collisions.entry(entity_a).or_default();
         collisions.entry(entity_b).or_default();
         let t_a = transform_a.translation();
@@ -155,7 +192,9 @@ fn test_colliders(
             collider_a.0.as_ref(),
             &[t_b.x, t_b.y, t_b.z].into(),
             collider_b.0.as_ref(),
-        ).unwrap() {
+        )
+        .unwrap()
+        {
             collisions.entry(entity_a).or_default().push(entity_b);
             collisions.entry(entity_b).or_default().push(entity_a);
         }
@@ -164,7 +203,7 @@ fn test_colliders(
         if collisions.is_empty() {
             commands.entity(entity).remove::<InCollision>();
         } else {
-            commands.entity(entity).insert(InCollision(collisions));
+            commands.entity(entity).insert(InCollision);
         }
     }
 }
@@ -175,13 +214,18 @@ fn check_anchor_clearance(
 ) {
     for (anchor_entity, base_transform, mut anchors) in &mut anchors {
         for (anchor_transform, anchor_color, ref mut anchor_state, _) in anchors.0.iter_mut() {
-            if *anchor_color == AnchorColor::Up && matches!(anchor_state, AnchorState::Clear | AnchorState::Blocked(_)) {
+            if *anchor_color == AnchorColor::Up
+                && matches!(anchor_state, AnchorState::Clear | AnchorState::Blocked(_))
+            {
                 *anchor_state = AnchorState::Clear;
-                let t_a = base_transform.translation() + *anchor_transform + Vec3::new(0.0, 1.0, 0.0);
-                let anchor_collider = parry3d::shape::Cuboid { half_extents: [0.5, 0.5, 0.5].into() };
+                let t_a =
+                    base_transform.translation() + *anchor_transform + Vec3::new(0.0, 1.0, 0.0);
+                let anchor_collider = parry3d::shape::Cuboid {
+                    half_extents: [0.5, 0.5, 0.5].into(),
+                };
                 for (block_entity, block_transform, block_collider) in &blocks {
                     if anchor_entity == block_entity {
-                        continue
+                        continue;
                     }
                     let t_b = block_transform.translation();
                     if parry3d::query::intersection_test(
@@ -189,7 +233,9 @@ fn check_anchor_clearance(
                         &anchor_collider,
                         &[t_b.x, t_b.y, t_b.z].into(),
                         block_collider.0.as_ref(),
-                    ).unwrap() {
+                    )
+                    .unwrap()
+                    {
                         *anchor_state = AnchorState::Blocked(block_entity);
                     }
                 }

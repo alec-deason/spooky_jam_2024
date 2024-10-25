@@ -24,7 +24,7 @@ pub enum Sky {
         end_time: std::time::Duration,
         start_star_brightness: f32,
         end_star_brightness: f32,
-    }
+    },
 }
 
 impl Sky {
@@ -42,10 +42,14 @@ impl Sky {
 
     pub fn current_color(&self, now: std::time::Duration) -> Color {
         match self {
-            Sky::Color(color, _) => {
-                *color
-            }
-            Sky::Transition { start_color, end_color, start_time, end_time, .. } => {
+            Sky::Color(color, _) => *color,
+            Sky::Transition {
+                start_color,
+                end_color,
+                start_time,
+                end_time,
+                ..
+            } => {
                 let t = now - *start_time;
                 let f = t.as_secs_f32() / (*end_time - *start_time).as_secs_f32();
                 start_color.mix(end_color, f)
@@ -55,10 +59,14 @@ impl Sky {
 
     pub fn current_star_brightness(&self, now: std::time::Duration) -> f32 {
         match self {
-            Sky::Color(_color, star_brightness) => {
-                *star_brightness
-            }
-            Sky::Transition { start_star_brightness, end_star_brightness, start_time, end_time, .. } => {
+            Sky::Color(_color, star_brightness) => *star_brightness,
+            Sky::Transition {
+                start_star_brightness,
+                end_star_brightness,
+                start_time,
+                end_time,
+                ..
+            } => {
                 let t = now - *start_time;
                 let f = t.as_secs_f32() / (*end_time - *start_time).as_secs_f32();
                 start_star_brightness + (end_star_brightness - start_star_brightness) * f
@@ -71,14 +79,14 @@ pub struct EnvironmentalDecorationPlugin;
 
 impl Plugin for EnvironmentalDecorationPlugin {
     fn build(&self, app: &mut App) {
-        app
-            .register_type::<FoundationIdle>()
+        app.register_type::<FoundationIdle>()
             .register_type::<Sky>()
             .register_type::<Star>()
             .register_type::<Water>()
-            .add_systems(Update, (water_animation_control, star_animation, sky_color_animation))
-        ;
-
+            .add_systems(
+                Update,
+                (water_animation_control, star_animation, sky_color_animation),
+            );
     }
 }
 fn water_animation_control(
@@ -86,8 +94,7 @@ fn water_animation_control(
     mut animation_players: Query<(&mut AnimationPlayer, &mut AnimationTransitions)>,
 ) {
     for (link, animations) in animations.iter() {
-        let (mut animation_player, mut transition) =
-            animation_players.get_mut(link.0).unwrap();
+        let (mut animation_player, mut transition) = animation_players.get_mut(link.0).unwrap();
         if let Some(animation) = animations.named_indices.get("Idle") {
             if !animation_player.is_playing_animation(*animation) {
                 transition
@@ -107,7 +114,12 @@ fn sky_color_animation(
         if let Some(material) = materials.get_mut(material_handle) {
             match &*sky_state {
                 Sky::Color(color, _) => material.emissive = (*color).into(),
-                Sky::Transition { end_color, end_time, end_star_brightness, .. } => {
+                Sky::Transition {
+                    end_color,
+                    end_time,
+                    end_star_brightness,
+                    ..
+                } => {
                     let now = time.elapsed();
                     if *end_time <= now {
                         *sky_state = Sky::Color(*end_color, *end_star_brightness);
@@ -129,7 +141,12 @@ fn star_animation(
         if let Some(material) = materials.get_mut(material_handle) {
             let b = match &*sky_state {
                 Sky::Color(_color, star_brightness) => *star_brightness,
-                Sky::Transition { end_color, end_time, end_star_brightness, .. } => {
+                Sky::Transition {
+                    end_color,
+                    end_time,
+                    end_star_brightness,
+                    ..
+                } => {
                     if *end_time <= now {
                         *sky_state = Sky::Color(*end_color, *end_star_brightness);
                     }
@@ -138,7 +155,8 @@ fn star_animation(
             };
             let c = sky_state.current_color(now).mix(&Color::WHITE, b);
             material.emissive = c.into();
-            material.base_color = Color::srgba(0.0,0.0,0.0,sky_state.current_star_brightness(now));
+            material.base_color =
+                Color::srgba(0.0, 0.0, 0.0, sky_state.current_star_brightness(now));
             material.alpha_mode = AlphaMode::Blend;
         }
     }

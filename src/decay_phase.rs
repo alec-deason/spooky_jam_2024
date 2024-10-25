@@ -1,21 +1,20 @@
-use std::time::Duration;
 use bevy::{
     prelude::*,
     reflect::TypePath,
-    render::{
-        render_resource::{
-            AsBindGroup, ShaderRef,
-        },
-    },
+    render::render_resource::{AsBindGroup, ShaderRef},
 };
+use std::time::Duration;
 
-use blenvy::{
-    BlueprintAnimationPlayerLink, BlueprintAnimations
-};
 use bevy_kira_audio::prelude::*;
+use blenvy::{BlueprintAnimationPlayerLink, BlueprintAnimations};
 
-use crate::{CameraScale, SNAP_DISTANCE, GameState, MousePos, block::{DisasterTarget, DecayedRepresentation, Conductor, Block, AnchorState, Anchors}, block_pool::DecayedPoolResident, environmental_decoration::{Star, Sky}, music::{Music, BackgroundMusic}};
-
+use crate::{
+    block::{AnchorState, Anchors, Block, Conductor, DecayedRepresentation, DisasterTarget},
+    block_pool::DecayedPoolResident,
+    environmental_decoration::{Sky, Star},
+    music::{BackgroundMusic, Music},
+    CameraScale, GameState, MousePos, SNAP_DISTANCE,
+};
 
 #[derive(Component, Reflect)]
 #[reflect(Component)]
@@ -40,15 +39,6 @@ struct ScreenFlash(bevy::time::Stopwatch, std::time::Duration);
 #[derive(Resource)]
 struct SparkSound(Option<Handle<AudioInstance>>);
 
-#[derive(Copy, Clone, Component)]
-struct Targeting;
-
-#[derive(Copy, Clone, Component)]
-struct Activate;
-
-#[derive(Copy, Clone, Component)]
-struct Targeted(Entity);
-
 impl Disaster {
     fn compatible(&self, target: &DisasterTarget) -> bool {
         match target {
@@ -62,9 +52,6 @@ enum PhasePhase {
     Running,
     Idle,
 }
-
-#[derive(Resource)]
-struct LightningStrikes(u32);
 
 #[derive(Component, Reflect, Copy, Clone, Debug)]
 #[reflect(Component)]
@@ -84,8 +71,7 @@ pub struct DecayPhasePlugin;
 
 impl Plugin for DecayPhasePlugin {
     fn build(&self, app: &mut App) {
-        app
-            .insert_resource(SparkSound(None))
+        app.insert_resource(SparkSound(None))
             .add_plugins(MaterialPlugin::<LineMaterial>::default())
             .register_type::<Disaster>()
             .register_type::<Eye>()
@@ -94,20 +80,44 @@ impl Plugin for DecayPhasePlugin {
             .register_type::<DarkFigureBody>()
             .insert_state(PhasePhase::Running)
             .add_systems(
-                PostUpdate, hide_dark_figure
-               .run_if(not(in_state(crate::GameState::DecayPhase))))
+                PostUpdate,
+                hide_dark_figure.run_if(not(in_state(crate::GameState::DecayPhase))),
+            )
             .add_systems(Update, (screen_flash, apply_decay))
-            .add_systems(OnEnter(crate::GameState::DecayPhase), (start_decay_loop, |mut next_state: ResMut<NextState<PhasePhase>>| { next_state.set(PhasePhase::Running) }))
-            .add_systems(Update, (extinguish_eyes, dark_figure_animation_control, spawn_dark_figure, maintain_active_tentacle, check_completion, activate_disaster).run_if(in_state(PhasePhase::Running).and_then(in_state(crate::GameState::DecayPhase))))
-            .add_systems(PostUpdate, (targeting).run_if(in_state(PhasePhase::Running).and_then(in_state(crate::GameState::DecayPhase))))
-            ;
+            .add_systems(
+                OnEnter(crate::GameState::DecayPhase),
+                (
+                    start_decay_loop,
+                    |mut next_state: ResMut<NextState<PhasePhase>>| {
+                        next_state.set(PhasePhase::Running)
+                    },
+                ),
+            )
+            .add_systems(
+                Update,
+                (
+                    extinguish_eyes,
+                    dark_figure_animation_control,
+                    spawn_dark_figure,
+                    maintain_active_tentacle,
+                    check_completion,
+                    activate_disaster,
+                )
+                    .run_if(
+                        in_state(PhasePhase::Running)
+                            .and_then(in_state(crate::GameState::DecayPhase)),
+                    ),
+            )
+            .add_systems(
+                PostUpdate,
+                (targeting).run_if(
+                    in_state(PhasePhase::Running).and_then(in_state(crate::GameState::DecayPhase)),
+                ),
+            );
     }
 }
 
-fn hide_dark_figure(
-    mut body: Query<&mut Visibility, With<DarkFigureBody>>,
-    mut done: Local<bool>
-) {
+fn hide_dark_figure(mut body: Query<&mut Visibility, With<DarkFigureBody>>, mut done: Local<bool>) {
     if !*done {
         for mut visibility in &mut body {
             *done = true;
@@ -117,7 +127,7 @@ fn hide_dark_figure(
 }
 
 fn spawn_dark_figure(
-    mut body: Query<Entity, With<DarkFigureBody>>,
+    body: Query<Entity, With<DarkFigureBody>>,
     children: Query<&Children>,
     mut visibility: Query<&mut Visibility>,
 ) {
@@ -151,25 +161,30 @@ fn start_decay_loop(
 }
 
 fn dark_figure_animation_control(
-    mut commands: Commands,
     animations: Query<(&BlueprintAnimationPlayerLink, &BlueprintAnimations), With<DarkFigureBody>>,
     mut animation_players: Query<(&mut AnimationPlayer, &mut AnimationTransitions)>,
     music: Res<crate::music::Music>,
     audio: Res<Audio>,
 ) {
     for (link, animations) in animations.iter() {
-        let (mut animation_player, mut transition) =
-            animation_players.get_mut(link.0).unwrap();
+        let (mut animation_player, mut transition) = animation_players.get_mut(link.0).unwrap();
         if let Some(idle_animation) = animations.named_indices.get("dark_figure_idle") {
             if let Some(emerge_animation) = animations.named_indices.get("emerge") {
                 if !animation_player.is_playing_animation(*idle_animation) {
                     if !animation_player.is_playing_animation(*emerge_animation) {
-                        transition
-                            .play(&mut animation_player, *emerge_animation, std::time::Duration::ZERO);
+                        transition.play(
+                            &mut animation_player,
+                            *emerge_animation,
+                            std::time::Duration::ZERO,
+                        );
                         audio.play(music.dark_figure_hit.clone());
                     } else if animation_player.all_finished() {
                         transition
-                            .play(&mut animation_player, *idle_animation, std::time::Duration::ZERO)
+                            .play(
+                                &mut animation_player,
+                                *idle_animation,
+                                std::time::Duration::ZERO,
+                            )
                             .repeat();
                     }
                 }
@@ -178,7 +193,7 @@ fn dark_figure_animation_control(
     }
 }
 
-fn extinguish_eyes (
+fn extinguish_eyes(
     mut query: Query<&mut Sky, (With<Star>, With<Eye>)>,
     mut removed: RemovedComponents<ActiveTentacle>,
     time: Res<Time>,
@@ -205,8 +220,11 @@ fn maintain_active_tentacle(
 ) {
     if active.is_empty() {
         for entity in &waiting {
-            commands.entity(entity).insert(ActiveTentacle).remove::<Disaster>();
-            return
+            commands
+                .entity(entity)
+                .insert(ActiveTentacle)
+                .remove::<Disaster>();
+            return;
         }
     }
 }
@@ -236,9 +254,9 @@ fn targeting(
         let mut min_distance = std::f32::INFINITY;
         for (target_entity, target_transform, disaster_target) in &targets {
             if Disaster::Lightning.compatible(&*disaster_target) {
-                let d = maybe_pos-target_transform.translation();
+                let d = maybe_pos - target_transform.translation();
                 let dist = d.length();
-                if dist < min_distance && dist < SNAP_DISTANCE*camera_scale.0 {
+                if dist < min_distance && dist < SNAP_DISTANCE * camera_scale.0 {
                     min_distance = dist;
                     maybe_pos.x = mouse_pos.0.x - d.x;
                     maybe_pos.y = mouse_pos.0.y - d.y;
@@ -246,8 +264,6 @@ fn targeting(
                 }
             }
         }
-
-
 
         if let Some(snapped) = snapped {
             maybe_pos.z = 0.0;
@@ -258,16 +274,16 @@ fn targeting(
             };
             let mut targets = vec![(snapped, maybe_pos.clone())];
             let mut total_travel = 15.0;
-            let mut did_work = true ;
+            let mut did_work = true;
             while did_work && total_travel > 0.0 {
                 did_work = false;
                 let mut min_dist = std::f32::INFINITY;
                 let mut closest = None;
                 for (entity, transform) in &conductors {
-                    if targets.iter().any(|(e, _)| *e==entity) {
-                        continue
+                    if targets.iter().any(|(e, _)| *e == entity) {
+                        continue;
                     }
-                    let d = (targets[targets.len()-1].1 - transform.translation()).length();
+                    let d = (targets[targets.len() - 1].1 - transform.translation()).length();
                     if d < 5.0 && d < min_dist {
                         min_dist = d;
                         closest = Some((entity, transform.translation()));
@@ -281,24 +297,31 @@ fn targeting(
             }
             material.points[0] = tentacle_transform.translation().extend(0.0);
             for i in 0..14.min(targets.len()) {
-                material.points[i+1] = targets[i].1.extend(0.0);
+                material.points[i + 1] = targets[i].1.extend(0.0);
                 material.point_count += 1;
             }
-            let mut targets:Vec<Entity> = targets.into_iter().map(|(e,_)| e).collect();
+            let mut targets: Vec<Entity> = targets.into_iter().map(|(e, _)| e).collect();
             targets.insert(0, snapped);
             for (entity, mut lightning) in &mut strikes {
                 lightning.0 = targets.clone();
-                commands.entity(entity).insert((
-                    MaterialMeshBundle {
-                        mesh: meshes.add(Rectangle {
-                            half_size: Vec2::new(100.0, 100.0),
-                        }),
-                        material: materials.add(material.clone()),
-                        ..default()
-                    },
-                ));
+                commands.entity(entity).insert((MaterialMeshBundle {
+                    mesh: meshes.add(Rectangle {
+                        half_size: Vec2::new(100.0, 100.0),
+                    }),
+                    material: materials.add(material.clone()),
+                    ..default()
+                },));
                 if spark.0.is_none() {
-                    spark.0 = Some(audio.play(music.spark.clone()).start_from(1.2).linear_fade_in(Duration::from_millis(250)).with_volume(0.125).loop_from(1.2).loop_until(9.0).handle());
+                    spark.0 = Some(
+                        audio
+                            .play(music.spark.clone())
+                            .start_from(1.2)
+                            .linear_fade_in(Duration::from_millis(250))
+                            .with_volume(0.125)
+                            .loop_from(1.2)
+                            .loop_until(9.0)
+                            .handle(),
+                    );
                 }
                 found = true;
                 break;
@@ -315,7 +338,16 @@ fn targeting(
                     Lightning(targets),
                 ));
                 if spark.0.is_none() {
-                    spark.0 = Some(audio.play(music.spark.clone()).start_from(1.2).linear_fade_in(Duration::from_millis(250)).with_volume(0.125).loop_from(1.2).loop_until(9.0).handle());
+                    spark.0 = Some(
+                        audio
+                            .play(music.spark.clone())
+                            .start_from(1.2)
+                            .linear_fade_in(Duration::from_millis(250))
+                            .with_volume(0.125)
+                            .loop_from(1.2)
+                            .loop_until(9.0)
+                            .handle(),
+                    );
                 }
             }
         } else {
@@ -332,7 +364,7 @@ fn targeting(
 fn activate_disaster(
     mut commands: Commands,
     query: Query<(Entity, &Lightning)>,
-    blocks: Query<(&Transform, &DecayedRepresentation), Without<NeedsDecay>>,
+    blocks: Query<&DecayedRepresentation, Without<NeedsDecay>>,
     parents: Query<&Parent>,
     mouse_button_input: Res<ButtonInput<MouseButton>>,
     mut anchors: Query<&mut Anchors>,
@@ -344,38 +376,44 @@ fn activate_disaster(
     mut spark: ResMut<SparkSound>,
     mut instances: ResMut<Assets<AudioInstance>>,
 ) {
-    if let Some((tentacle_entity, tentacle_transform)) = tentacles.iter().next() {
+    if let Some((tentacle_entity, _tentacle_transform)) = tentacles.iter().next() {
         if mouse_button_input.just_released(MouseButton::Left) {
             commands.entity(tentacle_entity).remove::<ActiveTentacle>();
             audio.play(music.thunder.clone());
             if let Some(player) = spark.0.take().and_then(|h| instances.get_mut(&h)) {
                 player.stop(AudioTween::linear(Duration::from_millis(250)));
             }
-            commands.spawn(PbrBundle {
-                mesh: meshes.add(Rectangle {
-                     half_size: Vec2::new(100.0, 100.0),
-                }),
-                material: materials.add(StandardMaterial {
-                    base_color: Color::rgba(0.0,0.0,0.0,1.0),
-                    emissive: Color::rgb(1000.0, 1000.0, 1000.0).into(),
-                    alpha_mode: AlphaMode::Blend,
+            commands
+                .spawn(PbrBundle {
+                    mesh: meshes.add(Rectangle {
+                        half_size: Vec2::new(100.0, 100.0),
+                    }),
+                    material: materials.add(StandardMaterial {
+                        base_color: Color::srgba(0.0, 0.0, 0.0, 1.0),
+                        emissive: Color::srgb(1000.0, 1000.0, 1000.0).into(),
+                        alpha_mode: AlphaMode::Blend,
+                        ..default()
+                    }),
                     ..default()
-                }),
-                ..default()
-            }).insert(ScreenFlash(default(), std::time::Duration::from_millis(75)));
+                })
+                .insert(ScreenFlash(default(), std::time::Duration::from_millis(75)));
             let mut done = std::collections::HashSet::new();
             for (entity, lightning) in &query {
                 for targeted_entity in &lightning.0 {
-                    for ancestor in std::iter::once(*targeted_entity).chain(parents.iter_ancestors(*targeted_entity)) {
+                    for ancestor in std::iter::once(*targeted_entity)
+                        .chain(parents.iter_ancestors(*targeted_entity))
+                    {
                         if let Ok(mut anchors) = anchors.get_mut(ancestor) {
                             for (_, _, anchor_state, _) in &mut anchors.0 {
                                 if let AnchorState::Occupied(entity) = *anchor_state {
                                     if done.contains(&entity) {
-                                        continue
+                                        continue;
                                     }
                                     *anchor_state = AnchorState::Blocked(entity);
-                                    if let Ok((transform, decayed)) = blocks.get(entity) {
-                                        commands.entity(entity).insert(NeedsDecay(format!("levels/{}", decayed.0)));
+                                    if let Ok(decayed) = blocks.get(entity) {
+                                        commands
+                                            .entity(entity)
+                                            .insert(NeedsDecay(format!("levels/{}", decayed.0)));
 
                                         done.insert(entity);
                                     }
@@ -383,12 +421,14 @@ fn activate_disaster(
                             }
                         }
                         if done.contains(&ancestor) {
-                            continue
+                            continue;
                         }
-                        if let Ok((transform, decayed)) = blocks.get(ancestor) {
-                            commands.entity(ancestor).insert(NeedsDecay(format!("levels/{}", decayed.0)));
+                        if let Ok(decayed) = blocks.get(ancestor) {
+                            commands
+                                .entity(ancestor)
+                                .insert(NeedsDecay(format!("levels/{}", decayed.0)));
                             done.insert(ancestor);
-                            break
+                            break;
                         }
                     }
                 }
@@ -406,18 +446,17 @@ fn apply_decay(
     for (needy_entity, transform, need) in &query {
         let mut found = None;
         for (entity, resident) in &block_pool {
-            if resident.0 == need.0{
+            if resident.0 == need.0 {
                 found = Some(entity);
                 break;
             }
         }
         if let Some(entity) = found {
-            commands.entity(entity).insert((
-                transform.clone(),
-                Block,
-                Decayed,
-                Visibility::Visible,
-            )).remove::<DecayedPoolResident>().remove::<Parent>();
+            commands
+                .entity(entity)
+                .insert((transform.clone(), Block, Decayed, Visibility::Visible))
+                .remove::<DecayedPoolResident>()
+                .remove::<Parent>();
             commands.entity(needy_entity).despawn_recursive();
             return;
         }
@@ -462,11 +501,11 @@ fn screen_flash(
     for (entity, mut flash, handle) in &mut query {
         flash.0.tick(time.delta());
         if let Some(material) = materials.get_mut(handle) {
-            let t = (flash.1.as_secs_f32() / flash.0.elapsed().as_secs_f32());
+            let t = flash.1.as_secs_f32() / flash.0.elapsed().as_secs_f32();
             if flash.0.elapsed().as_secs_f32() >= flash.1.as_secs_f32() {
                 commands.entity(entity).despawn_recursive();
             }
-            material.base_color = Color::rgba(1.0, 1.0, 1.0, t);
+            material.base_color = Color::srgba(1.0, 1.0, 1.0, t);
         }
     }
 }
