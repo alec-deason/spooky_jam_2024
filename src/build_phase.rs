@@ -332,6 +332,9 @@ fn follow_mouse(
         let mut min_distance = std::f32::INFINITY;
         if in_collision.is_none() {
             for (other_entity, other_transform, other_anchors) in &others {
+                if other_entity == entity {
+                    continue
+                }
                 for (a_anchor, (anchor, color, anchor_state, _)) in anchors.0.iter().enumerate() {
                     if !(matches!(anchor_state, AnchorState::Clear)
                         || matches!(anchor_state, AnchorState::Blocked(e) if *e == other_entity))
@@ -348,7 +351,7 @@ fn follow_mouse(
                             continue;
                         }
                         let d =
-                            (maybe_pos + *anchor) - (other_transform.translation() + *other_anchor);
+                            (mouse_pos.0.extend(maybe_pos.z) + *anchor) - (other_transform.translation() + *other_anchor);
                         let dist = d.length();
                         if dist < SNAP_DISTANCE * camera_scale.0 {
                             if dist < min_distance {
@@ -382,6 +385,7 @@ fn follow_mouse(
                 }
             } else {
                 audio.play(clanks.0[fastrand::usize(0..clanks.0.len())].clone());
+                println!("{snapped:?}");
             }
             commands.entity(entity).insert(snapped);
         } else {

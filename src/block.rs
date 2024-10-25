@@ -107,7 +107,8 @@ impl Plugin for BlockPlugin {
                     lift_component::<NoCollide>,
                 ),
             )
-            .add_systems(PostUpdate, check_anchor_clearance);
+            .add_systems(PostUpdate, check_anchor_clearance)
+        ;
     }
 }
 
@@ -127,7 +128,10 @@ fn configure_anchors(
             .last()
             .unwrap();
         if let Ok((maybe_anchors, parent_transform)) = composite_anchors.get_mut(parent_entity) {
-            let translation = base_transform.translation * parent_transform.scale;
+            let mut translation = base_transform.translation * parent_transform.scale;
+            translation.x = (translation.x).round();
+            translation.y = (translation.y).round();
+            translation.z = (translation.z).round();
 
             if let Some(mut anchors) = maybe_anchors {
                 anchors.0.push((
