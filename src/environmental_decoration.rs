@@ -1,9 +1,20 @@
-use bevy::prelude::*;
+use std::time::Duration;
+
+use bevy::{
+    prelude::*,
+    time::common_conditions::on_timer,
+};
 use blenvy::*;
+
+use crate::CLOUDS;
 
 #[derive(Component, Reflect)]
 #[reflect(Component)]
 pub struct FoundationIdle;
+
+#[derive(Component, Reflect)]
+#[reflect(Component)]
+pub struct Cloud;
 
 #[derive(Component, Reflect)]
 #[reflect(Component)]
@@ -32,7 +43,7 @@ impl Sky {
         let color = self.current_color(now);
         *self = Sky::Transition {
             start_color: color,
-            end_color: Color::srgba(0.052, 0.051, 0.062, 1.0),
+            end_color: Color::srgba(0.072, 0.071, 0.072, 1.0),
             start_time: now,
             end_time: now + std::time::Duration::from_secs(2),
             start_star_brightness: self.current_star_brightness(now),
@@ -85,7 +96,7 @@ impl Plugin for EnvironmentalDecorationPlugin {
             .register_type::<Water>()
             .add_systems(
                 Update,
-                (water_animation_control, star_animation, sky_color_animation),
+                (maintain_clouds.run_if(on_timer(Duration::from_millis(1000))), move_clouds.run_if(on_timer(Duration::from_millis(16))), water_animation_control, star_animation, sky_color_animation),
             );
     }
 }
@@ -159,5 +170,42 @@ fn star_animation(
                 Color::srgba(0.0, 0.0, 0.0, sky_state.current_star_brightness(now));
             material.alpha_mode = AlphaMode::Blend;
         }
+    }
+}
+
+fn maintain_clouds(
+    mut commands: Commands,
+    query: Query<(Entity, &Transform), With<Cloud>>,
+) {
+    let mut count = 0;
+    for (entity, transform) in &query {
+        if transform.translation.x > 34.0 {
+            commands.entity(entity).despawn_recursive();
+        } else {
+            count += 1;
+        }
+    }
+
+    if count < 10 && fastrand::f32() > 0.3 {
+        let mut scale = Vec3::splat(fastrand::u32(90..120) as f32 / 100.0);
+        scale.x = fastrand::u32(100..250) as f32 / 100.0;
+        let transform = Transform::from_translation(Vec3::new(fastrand::i32(-60..-40) as f32, fastrand::i32(0..23) as f32, -7.0)).with_scale(scale);
+        let path = CLOUDS[fastrand::usize(0..CLOUDS.len())];
+        commands.spawn((
+            transform,
+            BlueprintInfo::from_path(path),
+            SpawnBlueprint,
+            HideUntilReady,
+            GameWorldTag,
+            Cloud,
+        ));
+    }
+}
+
+fn move_clouds(
+    mut query: Query<&mut Transform, With<Cloud>>,
+) {
+    for mut transform in &mut query {
+        transform.translation.x += 0.1 + 0.05*(transform.translation.y/23.0);
     }
 }

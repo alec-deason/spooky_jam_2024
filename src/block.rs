@@ -108,6 +108,7 @@ impl Plugin for BlockPlugin {
                 (
                     add_colliders,
                     configure_anchors,
+                    befuddle_weird_machines,
                     lift_component::<DecayedRepresentation>,
                     lift_component::<NoCollide>,
                 ),
@@ -178,9 +179,9 @@ fn add_colliders(
             .insert(ProcessedCollider)
             .insert(Collider(Box::new(parry3d::shape::Cuboid {
                 half_extents: [
-                    aabb.half_extents.x * 0.9,
-                    aabb.half_extents.y * 0.9,
-                    aabb.half_extents.z * 0.9,
+                    aabb.half_extents.x * 0.4,
+                    aabb.half_extents.y * 0.4,
+                    aabb.half_extents.z * 0.4,
                 ]
                 .into(),
             })));
@@ -250,5 +251,13 @@ fn check_anchor_clearance(
                 }
             }
         }
+    }
+}
+
+fn befuddle_weird_machines(
+    mut query: Query<&mut Transform, Added<WeirdMachine>>,
+) {
+    for mut transform in &mut query {
+        transform.rotate_local_axis(Dir3::Y, fastrand::f32()*std::f32::consts::TAU);
     }
 }

@@ -7,8 +7,8 @@ use blenvy::{
 };
 
 use crate::{
-    block::{AnchorState, Block, DecayedRepresentation},
-    block_pool::{BlockPoolResident, DecayedPoolResident},
+    block::{AnchorState, Block},
+    block_pool::BlockPoolResident,
     environmental_decoration::{Sky, Water},
     CameraScale, GameState, Lift, MousePos, SavedPosition, Spawned, SpawnedFrom, Spawner, BLOCKS,
     SNAP_DISTANCE,
@@ -196,7 +196,6 @@ fn spawn_block(
                         Block,
                         Visibility::Visible,
                         SpawnedFrom(spawner_entity),
-                        Lift::<DecayedRepresentation>::default(),
                         PickableBundle::default(),
                         On::<Pointer<DragStart>>::listener_insert(AwaitingPlacement),
                         On::<Pointer<DragEnd>>::listener_remove::<AwaitingPlacement>(),
@@ -385,7 +384,6 @@ fn follow_mouse(
                 }
             } else {
                 audio.play(clanks.0[fastrand::usize(0..clanks.0.len())].clone());
-                println!("{snapped:?}");
             }
             commands.entity(entity).insert(snapped);
         } else {
@@ -508,7 +506,6 @@ fn check_completion(
         &crate::block::Anchors,
         (
             Without<OnTentacle>,
-            Without<DecayedPoolResident>,
             Without<BlockPoolResident>,
         ),
     >,

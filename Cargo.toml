@@ -22,7 +22,7 @@ strip = "debuginfo"
 
 [dependencies]
 bevy = { version = "0.14.2", default-features = false, features = [
-"dynamic_linking", "jpeg",
+"dynamic_linking", "jpeg", "file_watcher",
   "animation",
   "bevy_asset",
   "bevy_state",

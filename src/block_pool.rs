@@ -4,7 +4,7 @@ use bevy::prelude::*;
 
 use blenvy::{BlueprintInfo, BlueprintInstanceReady, GameWorldTag, HideUntilReady, SpawnBlueprint};
 
-use crate::{BLOCKS, DECAYED};
+use crate::BLOCKS;
 
 pub struct BlockPoolPlugin;
 
@@ -15,11 +15,6 @@ pub struct BlockPool;
 pub struct BlockPoolResident(pub String);
 #[derive(Component)]
 pub struct TempBlockPoolResident(pub String);
-
-#[derive(Component)]
-pub struct DecayedPoolResident(pub String);
-#[derive(Component)]
-pub struct TempDecayedPoolResident(pub String);
 
 #[derive(Resource)]
 struct Pool(Entity);
@@ -52,8 +47,6 @@ fn maintain_pool(
     mut commands: Commands,
     block_query: Query<&BlockPoolResident>,
     temp_block_query: Query<&TempBlockPoolResident>,
-    decayed_query: Query<&DecayedPoolResident>,
-    temp_decayed_query: Query<&TempDecayedPoolResident>,
     pool: Res<Pool>,
 ) {
     let mut count = HashMap::with_capacity(BLOCKS.len());
@@ -82,49 +75,16 @@ fn maintain_pool(
             break;
         }
     }
-
-    let mut count = HashMap::with_capacity(DECAYED.len());
-    for resident in &decayed_query {
-        *count.entry(resident.0.clone()).or_insert(0) += 1;
-    }
-    for resident in &temp_decayed_query {
-        *count.entry(resident.0.clone()).or_insert(0) += 1;
-    }
-
-    for path in &DECAYED {
-        if count.get(*path).copied().unwrap_or(0) < 3 {
-            let id = commands
-                .spawn((
-                    BlueprintInfo::from_path(path),
-                    Visibility::Hidden,
-                    Transform::from_translation(Vec3::new(10000.0, 10000.0, 100000.0)),
-                    SpawnBlueprint,
-                    HideUntilReady,
-                    GameWorldTag,
-                    TempDecayedPoolResident(path.to_string()),
-                ))
-                .id();
-            commands.entity(pool.0).push_children(&[id]);
-            break;
-        }
-    }
 }
 
 fn add_resident_tag(
     mut commands: Commands,
     block_query: Query<(Entity, &TempBlockPoolResident), With<BlueprintInstanceReady>>,
-    decayed_query: Query<(Entity, &TempDecayedPoolResident), With<BlueprintInstanceReady>>,
 ) {
     for (entity, resident) in &block_query {
         commands
             .entity(entity)
             .remove::<TempBlockPoolResident>()
             .insert(BlockPoolResident(resident.0.clone()));
-    }
-    for (entity, resident) in &decayed_query {
-        commands
-            .entity(entity)
-            .remove::<TempDecayedPoolResident>()
-            .insert(DecayedPoolResident(resident.0.clone()));
     }
 }

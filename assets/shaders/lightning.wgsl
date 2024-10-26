@@ -44,12 +44,38 @@ fn fbm(uv: vec2<f32>, octaves:u32 ) -> f32 {
     return value;
 }
 
-fn sdSegment( p:vec2f, a:vec2f, b:vec2f) -> f32
+fn sdSegment( p:vec2f, a:vec2f, b:vec2f, w1:f32, w2:f32) -> f32
 {
     let pa = p-a;
     let ba = b-a;
     let h = clamp( dot(pa,ba)/dot(ba,ba), 0.0, 1.0 );
     return length( pa - ba*h );
+}
+
+fn dot2( v:vec3f ) -> f32 { return dot(v,v); }
+
+fn sdRoundCone( p:vec3f, a:vec3f, b:vec3f, r1:f32, r2:f32 ) -> f32
+{
+  // sampling independent computations (only depend on shape)
+  let ba = b - a;
+  let l2 = dot(ba,ba);
+  let rr = r1 - r2;
+  let a2 = l2 - rr*rr;
+  let il2 = 1.0/l2;
+    
+  // sampling dependant computations
+  let pa = p - a;
+  let y = dot(pa,ba);
+  let z = y - l2;
+  let x2 = dot2( pa*l2 - ba*y );
+  let y2 = y*y*l2;
+  let z2 = z*z*l2;
+
+  // single square root!
+  let k = sign(rr)*rr*rr*x2;
+  if( sign(z)*a2*z2>k ) { return sqrt(x2 + z2)        *il2 - r2; }
+  else if( sign(y)*a2*y2<k ) { return sqrt(x2 + y2)        *il2 - r1; }
+  else {return (sqrt(x2*a2*il2)+y*rr)*il2 - r1; }
 }
 
 struct LineMaterial {
@@ -69,8 +95,8 @@ fn fragment(
     var d = 100.0;
     let p_count = material.point_count - 1;
     for (var i = 0u; i < p_count; i++) {
-        let dd = sdSegment(uv, material.points[i].xy, material.points[i+1].xy);
-        d = min(d, dd);
+        let dd = sdRoundCone(vec3(uv.x, uv.y, 0.0), vec3(material.points[i].xy, 0.0), vec3(material.points[i+1].xy, 0.0), 0.1*material.points[i].w, 0.1*material.points[i+1].w);
+        d = max(min(d, dd), 0.0);
     }
     d *= 1.5;
     let color = effect_color * mix(0.0, 0.05, hash12(vec2(globals.time))) / d;

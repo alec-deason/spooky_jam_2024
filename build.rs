@@ -8,8 +8,8 @@ fn main() {
     let out_dir = std::env::var_os("OUT_DIR").unwrap();
     let path = std::path::Path::new(&out_dir).join("consts.rs");
     let mut block_paths = Vec::new();
-    let mut decayed_paths = String::new();
-    let mut decayed_count = 0;
+    let mut cloud_paths = String::new();
+    let mut cloud_count = 0;
     let mut prob_sum = 0.0;
     for entry in std::fs::read_dir(std::path::Path::new(&cargo_dir).join("assets/levels")).unwrap()
     {
@@ -26,10 +26,10 @@ fn main() {
             prob_sum += prob;
             block_paths.push((format!("\"levels/{}\"", filename), prob_sum));
         }
-        if filename.starts_with("decayed_") && path.extension() == Some(std::ffi::OsStr::new("glb"))
+        if filename.contains("cloud") && path.extension() == Some(std::ffi::OsStr::new("glb"))
         {
-            decayed_paths.push_str(&format!("\"levels/{}\",", filename));
-            decayed_count += 1;
+            cloud_paths.push_str(&format!("\"levels/{}\",", filename));
+            cloud_count += 1;
         }
     }
 
@@ -43,8 +43,8 @@ fn main() {
         block_count
     );
     code.push_str(&format!(
-        "const DECAYED: [&'static str; {}] = [{decayed_paths}];",
-        decayed_count
+        "const CLOUDS: [&'static str; {}] = [{cloud_paths}];",
+        cloud_count
     ));
 
     for (name, dir) in [

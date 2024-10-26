@@ -179,7 +179,6 @@ fn check_loading_completion(
             Or<(
                 Without<BlueprintInstanceReady>,
                 With<block_pool::TempBlockPoolResident>,
-                With<block_pool::TempDecayedPoolResident>,
             )>,
         ),
     >,
@@ -234,6 +233,10 @@ fn check_for_gltf_extras(
 ) {
     for (entity, extras) in gltf_extras_per_entity.iter() {
         let v: Value = serde_json::from_str(&extras.value).unwrap();
+        let mut randomize_value = 0.0;
+        if let Some(v) = v.get("randomize_value") {
+            randomize_value = v.as_f64().unwrap() as f32;
+        }
         if let Some(color) = v.get("color") {
             if ready.contains(entity) || parents.iter_ancestors(entity).any(|e| ready.contains(e)) {
                 let r = color.get(0).unwrap().as_f64().unwrap() as f32;
@@ -243,7 +246,9 @@ fn check_for_gltf_extras(
                     if let Ok(mut handle) = material_handle.get_mut(child_entity) {
                         if let Some(material) = materials.get_mut(&*handle) {
                             let mut new_material = material.clone();
-                            new_material.emissive = LinearRgba::new(r, g, b, 1.0);
+                            let mut color: Hsva = LinearRgba::new(r, g, b, 1.0).into();
+                            color.value *= (fastrand::f32() * 2.0 - 1.0) * randomize_value + 1.0;
+                            new_material.emissive = color.into();
                             *handle = materials.add(new_material);
                             commands.entity(entity).insert(ExtrasProcessed);
                         }

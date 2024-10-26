@@ -9,8 +9,7 @@ use bevy_kira_audio::prelude::*;
 use blenvy::{BlueprintAnimationPlayerLink, BlueprintAnimations};
 
 use crate::{
-    block::{AnchorState, Anchors, Block, Conductor, DecayedRepresentation, DisasterTarget},
-    block_pool::DecayedPoolResident,
+    block::{WeirdMachine, AnchorState, Anchors, Block, Conductor, DecayedRepresentation, DisasterTarget},
     environmental_decoration::{Sky, Star},
     music::{BackgroundMusic, Music},
     CameraScale, GameState, MousePos, SNAP_DISTANCE,
@@ -18,7 +17,7 @@ use crate::{
 
 #[derive(Component, Reflect)]
 #[reflect(Component)]
-pub struct NeedsDecay(String);
+pub struct NeedsDecay;
 
 #[derive(Component)]
 pub struct Decayed;
@@ -233,7 +232,7 @@ fn targeting(
     mut commands: Commands,
     mouse_pos: Res<MousePos>,
     targets: Query<(Entity, &GlobalTransform, &DisasterTarget)>,
-    conductors: Query<(Entity, &GlobalTransform), With<Conductor>>,
+    conductors: Query<(Entity, &GlobalTransform, Option<&WeirdMachine>), With<Conductor>>,
     mut strikes: Query<(Entity, &mut Lightning)>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<LineMaterial>>,
@@ -272,35 +271,41 @@ fn targeting(
                 point_count: 1,
                 ..default()
             };
-            let mut targets = vec![(snapped, maybe_pos.clone())];
+            let mut targets = vec![(snapped, maybe_pos.clone(), 1.0)];
             let mut total_travel = 15.0;
             let mut did_work = true;
             while did_work && total_travel > 0.0 {
                 did_work = false;
                 let mut min_dist = std::f32::INFINITY;
                 let mut closest = None;
-                for (entity, transform) in &conductors {
-                    if targets.iter().any(|(e, _)| *e == entity) {
+                for (entity, transform, maybe_machine) in &conductors {
+                    if targets.iter().any(|(e, _, _)| *e == entity) {
                         continue;
                     }
                     let d = (targets[targets.len() - 1].1 - transform.translation()).length();
                     if d < 5.0 && d < min_dist {
                         min_dist = d;
-                        closest = Some((entity, transform.translation()));
+                        let (_, rotation, translation) = transform.to_scale_rotation_translation();
+                        closest = Some((entity, translation, rotation, maybe_machine.is_some()));
                     }
                 }
-                if let Some((entity, transform)) = closest {
+                if let Some((entity, translation, rotation, is_machine)) = closest {
                     did_work = true;
-                    total_travel -= min_dist;
-                    targets.push((entity, transform));
+                    targets.push((entity, translation, total_travel/15.0));
+                    if is_machine {
+                        total_travel += 15.0;
+                        targets.push((entity, translation + rotation.mul_vec3(Vec3::new(5.0, 0.0, 0.0)), total_travel/15.0));
+                    } else {
+                        total_travel -= min_dist;
+                    }
                 }
             }
-            material.points[0] = tentacle_transform.translation().extend(0.0);
+            material.points[0] = tentacle_transform.translation().extend(1.0);
             for i in 0..14.min(targets.len()) {
-                material.points[i + 1] = targets[i].1.extend(0.0);
+                material.points[i + 1] = targets[i].1.extend(targets[i].2);
                 material.point_count += 1;
             }
-            let mut targets: Vec<Entity> = targets.into_iter().map(|(e, _)| e).collect();
+            let mut targets: Vec<Entity> = targets.into_iter().map(|(e, _, _)| e).collect();
             targets.insert(0, snapped);
             for (entity, mut lightning) in &mut strikes {
                 lightning.0 = targets.clone();
@@ -364,7 +369,7 @@ fn targeting(
 fn activate_disaster(
     mut commands: Commands,
     query: Query<(Entity, &Lightning)>,
-    blocks: Query<&DecayedRepresentation, Without<NeedsDecay>>,
+    blocks: Query<Entity, (With<Block>, Without<NeedsDecay>, Without<Decayed>)>,
     parents: Query<&Parent>,
     mouse_button_input: Res<ButtonInput<MouseButton>>,
     mut anchors: Query<&mut Anchors>,
@@ -410,10 +415,10 @@ fn activate_disaster(
                                         continue;
                                     }
                                     *anchor_state = AnchorState::Blocked(entity);
-                                    if let Ok(decayed) = blocks.get(entity) {
+                                    if blocks.contains(entity) {
                                         commands
                                             .entity(entity)
-                                            .insert(NeedsDecay(format!("levels/{}", decayed.0)));
+                                            .insert(NeedsDecay);
 
                                         done.insert(entity);
                                     }
@@ -423,10 +428,10 @@ fn activate_disaster(
                         if done.contains(&ancestor) {
                             continue;
                         }
-                        if let Ok(decayed) = blocks.get(ancestor) {
+                        if blocks.contains(ancestor) {
                             commands
                                 .entity(ancestor)
-                                .insert(NeedsDecay(format!("levels/{}", decayed.0)));
+                                .insert(NeedsDecay);
                             done.insert(ancestor);
                             break;
                         }
@@ -440,25 +445,19 @@ fn activate_disaster(
 
 fn apply_decay(
     mut commands: Commands,
-    query: Query<(Entity, &Transform, &NeedsDecay)>,
-    block_pool: Query<(Entity, &DecayedPoolResident)>,
+    query: Query<Entity, With<NeedsDecay>>,
+    children: Query<&Children>,
+    mut material_handle: Query<&mut Handle<StandardMaterial>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    for (needy_entity, transform, need) in &query {
-        let mut found = None;
-        for (entity, resident) in &block_pool {
-            if resident.0 == need.0 {
-                found = Some(entity);
-                break;
+    for needy_entity in &query {
+        commands.entity(needy_entity).remove::<NeedsDecay>().remove::<Anchors>().insert(Decayed);
+        for entity in std::iter::once(needy_entity).chain(children.iter_descendants(needy_entity)) {
+            commands.entity(entity).remove::<DisasterTarget>();
+            if let Some(material) = material_handle.get(entity).ok().and_then(|h| materials.get_mut(h)) {
+                let mut hsv: Hsva = material.emissive.into();
+                material.emissive = hsv.with_saturation(0.2).with_value(0.2).into();
             }
-        }
-        if let Some(entity) = found {
-            commands
-                .entity(entity)
-                .insert((transform.clone(), Block, Decayed, Visibility::Visible))
-                .remove::<DecayedPoolResident>()
-                .remove::<Parent>();
-            commands.entity(needy_entity).despawn_recursive();
-            return;
         }
     }
 }

@@ -15054,6 +15054,17 @@
       "type": "object",
       "typeInfo": "Struct"
     },
+    "spooky_jam::block::WeirdMachine": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "long_name": "spooky_jam::block::WeirdMachine",
+      "properties": {},
+      "required": [],
+      "short_name": "WeirdMachine",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
     "spooky_jam::build_phase::Extending": {
       "additionalProperties": false,
       "isComponent": true,
