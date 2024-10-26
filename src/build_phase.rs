@@ -10,7 +10,7 @@ use crate::{
     block::{AnchorState, Block},
     block_pool::BlockPoolResident,
     environmental_decoration::{Sky, Water},
-    crow::CrowPickupTarget,
+    crow::{CrowPickupTarget, CrowTakeawayTarget, Grab},
     CameraScale, GameState, Lift, MousePos, SavedPosition, Spawned, SpawnedFrom, Spawner, BLOCKS,
     SNAP_DISTANCE,
 };
@@ -234,6 +234,7 @@ fn stop_drag(
             Or<(With<Snapped>, With<SavedPosition>)>,
         ),
     >,
+    crows: Query<(Entity, &Grab)>,
     children_query: Query<&Children>,
     water: Query<&GlobalTransform, With<Water>>,
     mut anchors: Query<&mut crate::block::Anchors>,
@@ -269,18 +270,19 @@ fn stop_drag(
             }
             transform.translation = *a_translation;
         } else {
-            for water_transform in &water {
-                if transform.translation.y < water_transform.translation().y {
-                    commands.entity(entity).despawn_recursive();
+            let mut found = None;
+            for (e, grab) in &crows {
+                if grab.0 == entity {
+                    found= Some(e);
                     commands
-                        .entity(spawned_from.0)
-                        .remove::<Spawned>()
-                        .insert(Retracting);
-                    break;
+                        .entity(entity)
+                        .insert(CrowTakeawayTarget);
                 }
             }
-            if let Some(saved) = maybe_saved {
-                *transform = saved.0.clone();
+            if found.is_none() {
+                if let Some(saved) = maybe_saved {
+                    *transform = saved.0.clone();
+                }
             }
         }
     }
@@ -479,7 +481,7 @@ pub fn tentacle_retracting(
 
 fn blocks_track_spawners(
     spawners: Query<(&GlobalTransform, &Spawned)>,
-    mut blocks: Query<&mut Transform, Without<AwaitingPlacement>>,
+    mut blocks: Query<&mut Transform, (Without<AwaitingPlacement>, Without<CrowTakeawayTarget>)>,
 ) {
     for (spawner_transform, spawned_block) in &spawners {
         if let Ok(mut block_transform) = blocks.get_mut(spawned_block.0) {

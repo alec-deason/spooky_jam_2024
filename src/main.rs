@@ -87,7 +87,7 @@ fn main() {
                 }),
         )
         .add_plugins(AudioPlugin)
-        //.add_plugins(bevy_inspector_egui::quick::WorldInspectorPlugin::new())
+        .add_plugins(bevy_inspector_egui::quick::WorldInspectorPlugin::new())
         .insert_state(GameState::Loading)
         .add_plugins(BlenvyPlugin::default())
         .add_plugins(
