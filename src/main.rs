@@ -18,6 +18,7 @@ mod decay_phase;
 mod environmental_decoration;
 mod music;
 mod scoring_phase;
+mod crow;
 
 const SNAP_DISTANCE: f32 = 30.0;
 include!(concat!(env!("OUT_DIR"), "/consts.rs"));
@@ -100,6 +101,7 @@ fn main() {
         .add_plugins(music::AudioPlugin)
         .add_plugins(crate::environmental_decoration::EnvironmentalDecorationPlugin)
         .add_plugins(build_phase::BuildPhasePlugin)
+        .add_plugins(crow::CrowPlugin)
         .add_plugins(decay_phase::DecayPhasePlugin)
         .add_plugins(scoring_phase::ScoringPhasePlugin)
         .insert_resource(AmbientLight {

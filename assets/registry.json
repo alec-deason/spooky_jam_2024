@@ -15098,6 +15098,67 @@
       "type": "object",
       "typeInfo": "Struct"
     },
+    "spooky_jam::crow::CrowParams": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": true,
+      "long_name": "spooky_jam::crow::CrowParams",
+      "properties": {
+        "alignment": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        },
+        "avoid_distance": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        },
+        "avoidance": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        },
+        "cohesion": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        },
+        "friction": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        },
+        "max_speed": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        },
+        "speed": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        },
+        "target": {
+          "type": {
+            "$ref": "#/$defs/glam::Vec3"
+          }
+        }
+      },
+      "required": [
+        "avoidance",
+        "alignment",
+        "cohesion",
+        "friction",
+        "avoid_distance",
+        "speed",
+        "max_speed",
+        "target"
+      ],
+      "short_name": "CrowParams",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
     "spooky_jam::decay_phase::DarkFigureBody": {
       "additionalProperties": false,
       "isComponent": true,

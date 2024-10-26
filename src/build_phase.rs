@@ -10,6 +10,7 @@ use crate::{
     block::{AnchorState, Block},
     block_pool::BlockPoolResident,
     environmental_decoration::{Sky, Water},
+    crow::CrowPickupTarget,
     CameraScale, GameState, Lift, MousePos, SavedPosition, Spawned, SpawnedFrom, Spawner, BLOCKS,
     SNAP_DISTANCE,
 };
@@ -241,6 +242,7 @@ fn stop_drag(
         commands
             .entity(entity)
             .remove::<Snapped>()
+            .remove::<CrowPickupTarget>()
             .remove::<SavedPosition>();
         if let Some(Snapped {
             a_entity,
@@ -373,6 +375,12 @@ fn follow_mouse(
 
         transform.translation.x = maybe_pos.x;
         transform.translation.y = maybe_pos.y;
+
+        if transform.translation.y > 10.0 {
+            commands.entity(entity).insert(CrowPickupTarget);
+        } else {
+            commands.entity(entity).remove::<CrowPickupTarget>();
+        }
 
         if let Some(snapped) = snapped {
             if let Ok(prev_snapped) = already_snapped.get(entity) {

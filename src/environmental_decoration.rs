@@ -38,6 +38,9 @@ pub enum Sky {
     },
 }
 
+#[derive(Resource)]
+struct CloudsContainer(Entity);
+
 impl Sky {
     pub fn to_night(&mut self, now: std::time::Duration) {
         let color = self.current_color(now);
@@ -95,11 +98,22 @@ impl Plugin for EnvironmentalDecorationPlugin {
             .register_type::<Star>()
             .register_type::<Water>()
             .add_systems(
+                Startup, make_cloud_container
+            )
+            .add_systems(
                 Update,
                 (maintain_clouds.run_if(on_timer(Duration::from_millis(1000))), move_clouds.run_if(on_timer(Duration::from_millis(16))), water_animation_control, star_animation, sky_color_animation),
             );
     }
 }
+
+fn make_cloud_container(
+    mut commands: Commands,
+) {
+    let id = commands.spawn(()).id();
+    commands.insert_resource(CloudsContainer(id));
+}
+
 fn water_animation_control(
     animations: Query<(&BlueprintAnimationPlayerLink, &BlueprintAnimations), With<FoundationIdle>>,
     mut animation_players: Query<(&mut AnimationPlayer, &mut AnimationTransitions)>,
@@ -176,6 +190,7 @@ fn star_animation(
 fn maintain_clouds(
     mut commands: Commands,
     query: Query<(Entity, &Transform), With<Cloud>>,
+    clouds: Res<CloudsContainer>,
 ) {
     let mut count = 0;
     for (entity, transform) in &query {
@@ -191,14 +206,14 @@ fn maintain_clouds(
         scale.x = fastrand::u32(100..250) as f32 / 100.0;
         let transform = Transform::from_translation(Vec3::new(fastrand::i32(-60..-40) as f32, fastrand::i32(0..23) as f32, -7.0)).with_scale(scale);
         let path = CLOUDS[fastrand::usize(0..CLOUDS.len())];
-        commands.spawn((
+        commands.entity(clouds.0).with_children(|commands| {commands.spawn((
             transform,
             BlueprintInfo::from_path(path),
             SpawnBlueprint,
             HideUntilReady,
             GameWorldTag,
             Cloud,
-        ));
+        ));});
     }
 }
 
