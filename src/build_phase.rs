@@ -9,8 +9,8 @@ use blenvy::{
 use crate::{
     block::{AnchorState, Block},
     block_pool::BlockPoolResident,
-    environmental_decoration::{Sky, Water},
-    crow::{CrowPickupTarget, CrowTakeawayTarget, Grab},
+    environmental_decoration::{Sky, Water, TimeOfDay},
+    crow::{CrowPickupTarget, CrowTakeawayTarget, Grab, Crow},
     CameraScale, GameState, Lift, MousePos, SavedPosition, Spawned, SpawnedFrom, Spawner, BLOCKS,
     SNAP_DISTANCE,
 };
@@ -76,6 +76,7 @@ impl Plugin for BuildPhasePlugin {
             .register_type::<Tentacle>()
             .register_type::<Extending>()
             .register_type::<Foundation>()
+            .register_type::<TentacleSpawner>()
             .init_resource::<Events<Pointer<Click>>>()
             .add_systems(
                 Update,
@@ -109,6 +110,7 @@ impl Plugin for BuildPhasePlugin {
                     .run_if(in_state(crate::GameState::BuildPhase)),
             )
             .add_systems(OnEnter(crate::GameState::Loading), setup)
+            .add_systems(OnEnter(crate::GameState::BuildPhase), setup_phase)
             .add_systems(
                 OnEnter(crate::GameState::BuildPhase),
                 |mut next_state: ResMut<NextState<PhasePhase>>| next_state.set(PhasePhase::Running),
@@ -121,12 +123,38 @@ impl Plugin for BuildPhasePlugin {
             )
             .add_systems(
                 OnExit(crate::GameState::BuildPhase),
-                (despawn_tentacles, despawn_spare_blocks),
+                (hide_tentacles, despawn_spare_blocks),
             );
     }
 }
 
-fn setup(mut commands: Commands) {
+fn setup_phase(
+    mut commands: Commands,
+    query: Query<(Entity, &TentacleSpawner)>,
+    crows: Query<Entity, With<Crow>>,
+    spawn_points: Query<Entity, With<Spawner>>,
+    mut sky: Query<&mut Sky>,
+    time: Res<Time>,
+    mut time_of_day: ResMut<TimeOfDay>,
+) {
+    *time_of_day = TimeOfDay::Day;
+    for mut sky in &mut sky {
+        sky.to_day(time.elapsed());
+    }
+    for (entity, spawner) in &query {
+        commands.entity(entity).remove::<Dead>().insert(Visibility::Visible).insert(Retracting);
+        if let Ok(e) = spawn_points.get(spawner.0) {
+            commands.entity(e).remove::<Spawned>();
+        }
+    }
+    for entity in &crows{
+        commands.entity(entity).insert(Visibility::Visible);
+    }
+}
+
+fn setup(
+    mut commands: Commands,
+) {
     commands.spawn((Camera3dBundle {
         transform: Transform::from_xyz(0.0, 0.0, 10.0)
             .looking_at(Vec3::new(0.0, 0.0, 0.0), Vec3::Y),
@@ -203,7 +231,7 @@ fn spawn_block(
                     ))
                     .remove::<BlockPoolResident>();
                 commands.entity(spawner_entity).insert(Spawned(entity));
-                return;
+                return
             }
         }
     }
@@ -523,6 +551,7 @@ fn check_completion(
     time: Res<Time>,
     mut next_state: ResMut<NextState<PhasePhase>>,
     mut delay: Local<bevy::time::Stopwatch>,
+    mut time_of_day: ResMut<TimeOfDay>,
 ) {
     delay.tick(time.delta());
     if !in_drag.is_empty() {
@@ -554,6 +583,7 @@ fn check_completion(
             }
             next_state.set(PhasePhase::ShuttingDown);
         }
+        *time_of_day = TimeOfDay::Night;
     } else {
         delay.reset();
     }
@@ -572,9 +602,16 @@ fn retract_tentacles(
     }
 }
 
-fn despawn_tentacles(mut commands: Commands, query: Query<Entity, With<Tentacle>>) {
+fn hide_tentacles(
+    mut commands: Commands,
+    query: Query<Entity, With<Tentacle>>,
+    crows: Query<Entity, With<Crow>>,
+) {
     for entity in &query {
-        commands.entity(entity).despawn_recursive();
+        commands.entity(entity).insert(Visibility::Hidden);
+    }
+    for entity in &crows {
+        commands.entity(entity).insert(Visibility::Hidden);
     }
 }
 

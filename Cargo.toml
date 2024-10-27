@@ -22,7 +22,7 @@ strip = "debuginfo"
 
 [dependencies]
 bevy = { version = "0.14.2", default-features = false, features = [
-"dynamic_linking", "jpeg", "file_watcher",
+"dynamic_linking", "jpeg",
   "animation",
   "bevy_asset",
   "bevy_state",
@@ -50,7 +50,7 @@ bevy = { version = "0.14.2", default-features = false, features = [
   "webgl2",
   "sysinfo_plugin",
 ] }
-bevy-inspector-egui = "0.26.0"
+#bevy-inspector-egui = "0.26.0"
 bevy_kira_audio = "0.20.0"
 bevy_mod_picking = "0.20.1"
 blenvy = { path = "/home/alec/Code/Vendor/Blenvy/crates/blenvy" }

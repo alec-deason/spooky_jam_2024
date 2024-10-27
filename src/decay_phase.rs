@@ -12,6 +12,7 @@ use crate::{
     block::{WeirdMachine, AnchorState, Anchors, Block, Conductor, DecayedRepresentation, DisasterTarget},
     environmental_decoration::{Sky, Star},
     music::{BackgroundMusic, Music},
+    block_pool::BlockPoolResident,
     CameraScale, GameState, MousePos, SNAP_DISTANCE,
 };
 
@@ -86,6 +87,7 @@ impl Plugin for DecayPhasePlugin {
             .add_systems(
                 OnEnter(crate::GameState::DecayPhase),
                 (
+                    setup_phase,
                     start_decay_loop,
                     |mut next_state: ResMut<NextState<PhasePhase>>| {
                         next_state.set(PhasePhase::Running)
@@ -113,6 +115,15 @@ impl Plugin for DecayPhasePlugin {
                     in_state(PhasePhase::Running).and_then(in_state(crate::GameState::DecayPhase)),
                 ),
             );
+    }
+}
+
+fn setup_phase(
+    mut commands: Commands,
+    query: Query<Entity, With<Eye>>,
+) {
+    for e in &query {
+        commands.entity(e).remove::<ActiveTentacle>().insert(Disaster::Lightning);
     }
 }
 
@@ -453,7 +464,7 @@ fn apply_decay(
     for needy_entity in &query {
         commands.entity(needy_entity).remove::<NeedsDecay>().remove::<Anchors>().insert(Decayed);
         for entity in std::iter::once(needy_entity).chain(children.iter_descendants(needy_entity)) {
-            commands.entity(entity).remove::<DisasterTarget>();
+            commands.entity(entity).remove::<DisasterTarget>().remove::<Conductor>();
             if let Some(material) = material_handle.get(entity).ok().and_then(|h| materials.get_mut(h)) {
                 let mut hsv: Hsva = material.emissive.into();
                 material.emissive = hsv.with_saturation(0.2).with_value(0.2).into();
@@ -466,8 +477,9 @@ fn check_completion(
     mut next_state: ResMut<NextState<GameState>>,
     mut next_local_state: ResMut<NextState<PhasePhase>>,
     tentacles: Query<Entity, Or<(With<ActiveTentacle>, With<Disaster>)>>,
+    blocks: Query<Entity, (With<Block>, Without<Decayed>, Without<BlockPoolResident>)>,
 ) {
-    if tentacles.is_empty() {
+    if tentacles.is_empty() || blocks.is_empty() {
         next_state.set(GameState::ScoringPhase);
         next_local_state.set(PhasePhase::Idle);
     }

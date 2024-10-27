@@ -4,7 +4,7 @@ use bevy::prelude::*;
 
 use blenvy::{BlueprintInfo, BlueprintInstanceReady, GameWorldTag, HideUntilReady, SpawnBlueprint};
 
-use crate::BLOCKS;
+use crate::{BLOCKS, DECORATIONS};
 
 pub struct BlockPoolPlugin;
 
@@ -49,7 +49,7 @@ fn maintain_pool(
     temp_block_query: Query<&TempBlockPoolResident>,
     pool: Res<Pool>,
 ) {
-    let mut count = HashMap::with_capacity(BLOCKS.len());
+    let mut count = HashMap::with_capacity(BLOCKS.len() + DECORATIONS.len());
     for resident in &block_query {
         *count.entry(resident.0.clone()).or_insert(0) += 1;
     }
@@ -57,7 +57,7 @@ fn maintain_pool(
         *count.entry(resident.0.clone()).or_insert(0) += 1;
     }
 
-    for (path, _) in &BLOCKS {
+    for (path, _) in BLOCKS.iter().chain(&DECORATIONS) {
         if count.get(*path).copied().unwrap_or(0) < 3 {
             let mut transform = Transform::from_translation(Vec3::new(10000.0, 10000.0, 100000.0));
             if path.contains("reversable") && fastrand::f32() > 0.5 {

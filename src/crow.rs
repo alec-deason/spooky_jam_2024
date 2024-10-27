@@ -8,9 +8,15 @@ use bevy::{
     time::common_conditions::on_timer,
 };
 use blenvy::*;
+use bevy_mod_picking::prelude::*;
 
 use crate::{
-    Spawned, SpawnedFrom, build_phase::Retracting,
+    Spawned, SpawnedFrom, build_phase::{Retracting, OnTentacle},
+    environmental_decoration::TimeOfDay,
+    build_phase::AwaitingPlacement,
+    block::Block,
+    block_pool::BlockPoolResident,
+    DECORATIONS,
 };
 
 
@@ -96,7 +102,7 @@ impl Plugin for CrowPlugin {
                 avoidance: 0.3,
                 alignment: 0.3,
                 cohesion: 0.3,
-                friction: 0.995,
+                friction: 0.99,
                 avoid_distance: 4.0,
                 speed: 0.05,
                 max_speed: 0.75,
@@ -238,10 +244,12 @@ fn steer_employed_crows(
     mut commands: Commands,
     mut query: Query<(Entity, &mut Transform, &mut Velocity, &mut Employed), Without<CrowTakeawayTarget>>,
     mut takeaways: Query<(&mut Transform, &SpawnedFrom), With<CrowTakeawayTarget>>,
+    block_pool: Query<(Entity, &BlockPoolResident)>,
     transforms: Query<&GlobalTransform>,
     params: Res<CrowParams>,
 ) {
-    for (entity, mut t, mut v, mut employment) in &mut query {
+    for (crow_entity, mut t, mut v, mut employment) in &mut query {
+        let mut speed_mul = 2.5;
         match &*employment {
             Employed::ExitingToDeliver(_, _) | Employed::ExitingToPickup(_) | Employed::ReturningToFlock => {
                 if &*employment == &Employed::ReturningToFlock {
@@ -251,21 +259,25 @@ fn steer_employed_crows(
                     t.scale = Vec3::splat(1.0);
                     t.translation.z = -7.1;
                 }
-                v.0 += (Vec2::new(0.0, 50.0)-t.translation.xy())*params.speed;
+                v.0 += (Vec2::new(0.0, 50.0)-t.translation.xy())*params.speed*speed_mul;
                 if (t.translation.xy() - Vec2::new(0.0, 50.0)).length() < 10.0 {
                     if let Some(next) = employment.next() {
                         *employment = next;
                     } else {
                         t.scale = Vec3::splat(1.0);
                         t.translation.z = -7.1;
-                        commands.entity(entity).remove::<Employed>();
+                        commands.entity(crow_entity).remove::<Employed>();
                     }
                 }
             }
             Employed::Delivering(_, target) => {
                 t.scale = Vec3::splat(5.0);
                 t.translation.z = 1.0;
-                v.0 += (target.xy()-t.translation.xy())*params.speed;
+                if (target.xy()-t.translation.xy()).length() > 5.0 {
+                    v.0 += (target.xy()-t.translation.xy())*params.speed*(target.xy()-t.translation.xy()).length().powi(2);
+                } else {
+                    v.0 = Vec2::ZERO;
+                }
             }
             Employed::PickingUp(e) => {
                 t.scale = Vec3::splat(5.0);
@@ -277,32 +289,60 @@ fn steer_employed_crows(
                             .entity(spawned_from.0)
                             .remove::<Spawned>()
                             .insert(Retracting);
-                        commands.entity(entity).remove::<Grab>();
-                        if let Some(next) = employment.next() {
-                            *employment = next;
-                        } else {
-                            t.scale = Vec3::splat(1.0);
-                            t.translation.z = -7.1;
-                            commands.entity(entity).remove::<Employed>();
+                        commands.entity(crow_entity).remove::<Grab>();
+
+                        let draw = fastrand::f32();
+                        let idx = DECORATIONS
+                         .iter()
+                         .position(|(_, p)| *p >= draw)
+                         .unwrap_or(DECORATIONS.len() - 1);
+                        let path = &DECORATIONS[idx].0;
+                        let mut found = None;
+                        for (entity, resident) in &block_pool {
+                         if &resident.0 == path {
+                             found = Some(entity);
+                             break;
+                         }
+                        }
+                        if let Some(entity) = found {
+                         commands
+                             .entity(entity)
+                             .insert((
+                                 OnTentacle,
+                                 Block,
+                                 Visibility::Visible,
+                                 SpawnedFrom(crow_entity),
+                                 PickableBundle::default(),
+                                 On::<Pointer<DragStart>>::listener_insert(AwaitingPlacement),
+                                 On::<Pointer<DragEnd>>::listener_remove::<AwaitingPlacement>(),
+                             ))
+                             .remove::<BlockPoolResident>();
+                         commands.entity(crow_entity).insert(Spawned(entity));
+                         let target = Vec3::new(
+                             fastrand::i32(-23..22) as f32,
+                             fastrand::i32(9..22) as f32,
+                             10.0
+                         );
+                         *employment = Employed::Delivering(entity, target);
                         }
                     } else {
-                        v.0 += (Vec2::new(0.0, 50.0)-t.translation.xy())*params.speed;
+                        v.0 += (Vec2::new(0.0, 50.0)-t.translation.xy())*params.speed*speed_mul;
                     }
                     takeaway.translation = t.translation;
                 } else {
                     if let Ok(target) = transforms.get(*e) {
                         let d = target.translation().xy()-t.translation.xy();
                         if d.length() < 4.0 {
-                            commands.entity(entity).insert(Grab(*e));
+                            commands.entity(crow_entity).insert(Grab(*e));
                             v.0 = Vec2::ZERO;
                         } else {
-                            v.0 += d*params.speed;
+                            v.0 += d*params.speed*speed_mul*(target.translation().xy()-t.translation.xy()).length().powi(2);
                         }
                     }
                 }
             }
         }
-        v.0 = v.0.clamp(-Vec2::splat(params.max_speed), Vec2::splat(params.max_speed));
+        v.0 = v.0.clamp(-Vec2::splat(params.max_speed*speed_mul), Vec2::splat(params.max_speed*speed_mul));
     }
 }
 
@@ -372,10 +412,10 @@ fn assign_crow_jobs(
 
 fn cleanup_crow_jobs(
     mut commands: Commands,
-    mut query: Query<(Entity, &mut Employed, &mut Transform, Option<&Velocity>)>,
+    mut query: Query<(Entity, &mut Employed, &mut Transform, Option<&Velocity>, Option<&Spawned>)>,
     jobs: Query<Entity, Or<(With<CrowPickupTarget>, With<CrowTakeawayTarget>)>>,
 ) {
-    for (e, mut employment, mut t, maybe_v) in &mut query {
+    for (e, mut employment, mut t, maybe_v, maybe_spawned) in &mut query {
         match &*employment {
             Employed::ExitingToPickup(target) => {
                 if !jobs.contains(*target) {
@@ -395,6 +435,11 @@ fn cleanup_crow_jobs(
                     *employment = Employed::ReturningToFlock;
                 }
             }
+            Employed::Delivering(..) => {
+                if maybe_spawned.is_none() {
+                    *employment = Employed::ReturningToFlock;
+                }
+            }
             _ => (),
         }
     }
@@ -403,19 +448,30 @@ fn cleanup_crow_jobs(
 fn perturb_crows(
     mut params: ResMut<CrowParams>,
     mut avoidance_target: Local<Option<f32>>,
+    time_of_day: Res<TimeOfDay>,
+    mut last_time_of_day: Local<TimeOfDay>,
 ) {
     if avoidance_target.is_none() {
         *avoidance_target = Some(params.avoid_distance);
     }
 
-    if fastrand::f32() < 1.0/(60.0*8.0) {
-        params.target.x = fastrand::i32(-40..34) as f32;
-        params.target.y = fastrand::i32(0..23) as f32;
-    }
+    if *time_of_day == TimeOfDay::Day {
+        if fastrand::f32() < 1.0/(60.0*8.0) || *last_time_of_day != *time_of_day {
+            params.target.x = fastrand::i32(-40..34) as f32;
+            params.target.y = fastrand::i32(0..23) as f32;
+        }
 
-    if fastrand::f32() < 1.0/(60.0*8.0) {
-        params.avoid_distance = 10.0;
-    } else if params.avoid_distance > avoidance_target.unwrap_or(4.0) {
-        params.avoid_distance -= 0.05;
+        if *last_time_of_day != *time_of_day {
+            params.avoid_distance = avoidance_target.unwrap_or(4.0);
+        } else if fastrand::f32() < 1.0/(60.0*8.0) {
+            params.avoid_distance = 10.0;
+        } else if params.avoid_distance > avoidance_target.unwrap_or(4.0) {
+            params.avoid_distance -= 0.05;
+        }
+    } else {
+        params.target.x = 74.0;
+        params.target.y = 70.0;
+        params.avoid_distance = 40.0;
     }
+    *last_time_of_day = *time_of_day;
 }

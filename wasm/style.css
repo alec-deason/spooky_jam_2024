@@ -3,7 +3,7 @@ body, html {
 }
 
 body {
-    background-color: lightgray;
+    background-color: black;
     margin: 0;
     display: flex;
     justify-content: center;
@@ -11,8 +11,8 @@ body {
 }
 
 .game-container {
-    width: 800px;
-    height: 600px;
+    width: 1098px;
+    height: 1025px;
     display: flex;
     justify-content: center;
     align-items: center;

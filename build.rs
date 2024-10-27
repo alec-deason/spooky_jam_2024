@@ -8,6 +8,7 @@ fn main() {
     let out_dir = std::env::var_os("OUT_DIR").unwrap();
     let path = std::path::Path::new(&out_dir).join("consts.rs");
     let mut block_paths = Vec::new();
+    let mut decoration_paths = Vec::new();
     let mut cloud_paths = String::new();
     let mut cloud_count = 0;
     let mut prob_sum = 0.0;
@@ -26,6 +27,15 @@ fn main() {
             prob_sum += prob;
             block_paths.push((format!("\"levels/{}\"", filename), prob_sum));
         }
+        if filename.starts_with("decoration_") && path.extension() == Some(std::ffi::OsStr::new("glb")) {
+            let prob = if let Some((_, n)) = prefix.rsplit_once("--") {
+                n.parse::<f32>().unwrap()
+            } else {
+                1.0
+            };
+            prob_sum += prob;
+            decoration_paths.push((format!("\"levels/{}\"", filename), prob_sum));
+        }
         if filename.contains("cloud") && path.extension() == Some(std::ffi::OsStr::new("glb"))
         {
             cloud_paths.push_str(&format!("\"levels/{}\",", filename));
@@ -42,6 +52,17 @@ fn main() {
         "const BLOCKS: [(&'static str, f32); {}] = [{block_paths_str}];",
         block_count
     );
+
+    let mut decoration_paths_str = String::new();
+    let decoration_count = decoration_paths.len();
+    for (path, prob) in decoration_paths {
+        decoration_paths_str.push_str(&format!("({path}, {:.3}),", prob / prob_sum));
+    }
+    code.push_str(&format!(
+        "const DECORATIONS: [(&'static str, f32); {}] = [{decoration_paths_str}];",
+        decoration_count
+    ));
+
     code.push_str(&format!(
         "const CLOUDS: [&'static str; {}] = [{cloud_paths}];",
         cloud_count

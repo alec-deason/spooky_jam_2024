@@ -24,6 +24,13 @@ pub struct Star;
 #[reflect(Component)]
 pub struct Water;
 
+#[derive(Resource, PartialEq, Eq, Debug, Default, Copy, Clone)]
+pub enum TimeOfDay {
+    #[default]
+    Day,
+    Night
+}
+
 #[derive(Component, Reflect)]
 #[reflect(Component)]
 pub enum Sky {
@@ -51,6 +58,17 @@ impl Sky {
             end_time: now + std::time::Duration::from_secs(2),
             start_star_brightness: self.current_star_brightness(now),
             end_star_brightness: 1.0,
+        };
+    }
+    pub fn to_day(&mut self, now: std::time::Duration) {
+        let color = self.current_color(now);
+        *self = Sky::Transition {
+            start_color: color,
+            end_color: Color::srgba(0.397, 0.383, 0.473, 1.0),
+            start_time: now,
+            end_time: now + std::time::Duration::from_secs(2),
+            start_star_brightness: self.current_star_brightness(now),
+            end_star_brightness: 0.0,
         };
     }
 
@@ -97,6 +115,7 @@ impl Plugin for EnvironmentalDecorationPlugin {
             .register_type::<Sky>()
             .register_type::<Star>()
             .register_type::<Water>()
+            .insert_resource(TimeOfDay::Day)
             .add_systems(
                 Startup, make_cloud_container
             )

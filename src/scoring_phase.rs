@@ -11,6 +11,7 @@ use crate::{
     block::Block,
     decay_phase::{DarkFigureBody, Decayed},
     music::{BackgroundMusic, Music},
+    block_pool::BlockPoolResident,
     GameState,
 };
 
@@ -53,7 +54,6 @@ fn hide_dark_figure(
     for (link, animations) in animations.iter() {
         let (mut animation_player, mut transition) = animation_players.get_mut(link.0).unwrap();
         if let Some(emerge_animation) = animations.named_indices.get("hide") {
-            println!("THING");
             transition.play(
                 &mut animation_player,
                 *emerge_animation,
@@ -165,6 +165,7 @@ fn score(
 }
 
 fn button_system(
+    mut commands: Commands,
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor, &mut BorderColor),
         (Changed<Interaction>, With<Button>),
@@ -192,7 +193,7 @@ fn button_system(
 
 fn cleanup(
     mut commands: Commands,
-    query: Query<Entity, Or<(With<Block>, With<UiStuff>, With<BlueprintInfo>)>>,
+    query: Query<Entity, (Or<(With<Block>, With<UiStuff>)>, Without<BlockPoolResident>)>,
 ) {
     for entity in &query {
         commands.entity(entity).despawn_recursive();

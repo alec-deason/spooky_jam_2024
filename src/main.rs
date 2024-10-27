@@ -81,13 +81,20 @@ fn main() {
                     level: Level::ERROR,
                     ..default()
                 })
+                .set(WindowPlugin {
+                    primary_window: Some(Window {
+                        fit_canvas_to_parent: true,
+                        ..default()
+                    }),
+                    ..default()
+                })
                 .set(AssetPlugin {
                     meta_check: AssetMetaCheck::Never,
                     ..default()
                 }),
         )
         .add_plugins(AudioPlugin)
-        .add_plugins(bevy_inspector_egui::quick::WorldInspectorPlugin::new())
+        //.add_plugins(bevy_inspector_egui::quick::WorldInspectorPlugin::new())
         .insert_state(GameState::Loading)
         .add_plugins(BlenvyPlugin::default())
         .add_plugins(
@@ -164,9 +171,15 @@ fn blank_screen(
         .insert(LoadingScreen);
 }
 
-fn maintain_camera_scale(projection: Query<&Projection>, mut camera_scale: ResMut<CameraScale>) {
-    for projection in &projection {
-        if let Projection::Orthographic(projection) = projection {
+fn maintain_camera_scale(
+    mut projection: Query<&mut Projection>,
+    mut camera_scale: ResMut<CameraScale>,
+    q_windows: Query<&Window, With<PrimaryWindow>>,
+) {
+    let window = q_windows.single();
+    for mut projection in &mut projection {
+        if let Projection::Orthographic(projection) = &mut *projection {
+            projection.scale = 44.0/ window.height();
             camera_scale.0 = projection.scale;
         }
     }
